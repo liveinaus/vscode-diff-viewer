@@ -1,11 +1,11 @@
 {
 	"name": "better-diff-viewer",
-	"displayName": "better-diff-viewer",
-	"description": "view diff in html",
+	"displayName": "Better Diff Viewer",
+	"description": "View Git diff in a colorful page ...",
 	"icon": "images/extension-icon.png",
 	"publisher": "SamWang",
 	"author": "Sam Wang",
-	"version": "0.0.1",
+	"version": "0.0.3",
 	"engines": {
 		"vscode": "^1.87.0"
 	},
