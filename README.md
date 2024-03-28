@@ -1,13 +1,13 @@
 # Better Diff Viewer
 
-View diff in HTML via Diff2Html-UI (https://github.com/rtfpessoa/diff2html).
+View Git diff in a colorful HTML page via [Diff2Html-UI](https://github.com/rtfpessoa/diff2html).
 
-![alt text](images/screenshot-0.0.1.png)
+![Better Diff Viewer screenshot](images/screenshot-0.0.1.png)
 
 ## Rationale
 
-Creating a similar diff view panel to Source Tree (`https://www.sourcetreeapp.com/`).
-The aim is add most of the features which Source Tree diff viewer can do.
+Creating a similar diff view panel to [Source Tree](https://www.sourcetreeapp.com).
+The aim is to add most of the features which [Source Tree](https://www.sourcetreeapp.com) diff viewer can do.
 For example, view Diff in HTML, revert a file ...
 
 ## Features & TODOs
@@ -65,9 +65,17 @@ For example, view Diff in HTML, revert a file ...
 - `better-diff-viewer.diff2html-ui.fileContentToggle`: see diff2html-ui for available values
 - `better-diff-viewer.diff2html-ui.stickyFileHeaders`: see diff2html-ui for available values
 
+## Installation
+
+[Open at Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=SamWang.better-diff-viewer)
+
 ## Thanks to Diff2Html
 
-https://github.com/rtfpessoa/diff2html
+[Goto Diff2Html](https://github.com/rtfpessoa/diff2html)
+
+## Author
+
+Sam Wang at [https://liveinaus.com](https://liveinaus.com)
 
 ## LICENSE
 
