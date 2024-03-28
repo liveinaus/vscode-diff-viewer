@@ -31,7 +31,7 @@
 			}
 		]
 	},
-	"repository": "https://github.com/liveinaus/vscode-html-diff",
+	"repository": "https://github.com/liveinaus/vscode-diff-viewer",
 	"scripts": {
 		"vscode:prepublish": "npm run package",
 		"compile": "webpack",
