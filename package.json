@@ -46,7 +46,8 @@
 		"watch-tests": "tsc -p . -w --outDir out",
 		"pretest": "npm run compile-tests && npm run compile && npm run lint",
 		"lint": "eslint src --ext ts",
-		"test": "vscode-test"
+		"test": "vscode-test",
+		"deploy": "vsce publish --yarn"
 	},
 	"devDependencies": {
 		"@types/mocha": "^10.0.6",
@@ -56,11 +57,11 @@
 		"@typescript-eslint/parser": "^7.0.2",
 		"@vscode/test-cli": "^0.0.6",
 		"@vscode/test-electron": "^2.3.9",
+		"@vscode/vsce": "^2.24.0",
 		"eslint": "^8.56.0",
 		"ts-loader": "^9.5.1",
 		"typescript": "^5.3.3",
 		"webpack": "^5.90.3",
 		"webpack-cli": "^5.1.4"
-	},
-	"dependencies": {}
+	}
 }
