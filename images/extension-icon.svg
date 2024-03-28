@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+	<!-- Background -->
+	<rect width="64" height="64" fill="#E7E7E7" />
+
+	<!-- Left Panel -->
+	<rect x="4" y="8" width="24" height="48" fill="#FF5722" />
+
+	<!-- Right Panel -->
+	<rect x="36" y="8" width="24" height="48" fill="#4CAF50" />
+
+
+	<!-- Arrow -->
+	<path d="M33 32l-6 6 6 6M34 38h22" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"
+		stroke-linejoin="round" />
+
+	<!-- Text -->
+	<text x="10" y="30" font-family="Arial" font-size="14" fill="#">Git &nbsp; Diff</text>
+</svg>

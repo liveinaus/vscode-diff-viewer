@@ -11,16 +11,26 @@ type DiffViewerData = {
 	cmd?: string;
 	diffContent?: string;
 	config?: BetterDiffViewerOptions;
+	userAction?: UserAction;
 };
 let userConfig: vscode.WorkspaceConfiguration;
 
+type UserAction = {
+	viewedFiles?: string[];
+	zoomNum?: number;
+	showCmd?: boolean;
+};
+
 type BetterDiffViewerOptions = {
-	"diff2html-ui": {};
-	customCssStyle: string;
 	isAutoRefresh?: boolean;
 	showBtnIcon?: boolean;
 	showBtnLongDesc?: boolean;
 	showBtnShortDesc?: boolean;
+	customCssStyle?: string;
+	preserveViewedFileState?: boolean;
+	showCmd?: boolean;
+	zoomNum?: number;
+	"diff2html-ui": {};
 };
 
 export function activate(context: vscode.ExtensionContext) {
@@ -75,13 +85,16 @@ function updateDataForConfig() {
 		stickyFileHeaders: userConfig.get("diff2html-ui.stickyFileHeaders"),
 	};
 
-	const defaultConfigObj = {
+	const defaultConfigObj: BetterDiffViewerOptions = {
 		"diff2html-ui": mergeConfig(defaultDiff2HtmlUiOptions, userDiff2HtmlUiConfigObj),
 		isAutoRefresh: true,
 		showBtnIcon: true,
 		showBtnLongDesc: true,
 		showBtnShortDesc: false,
 		customCssStyle: "",
+		preserveViewedFileState: true,
+		showCmd: true,
+		zoomNum: 0.9,
 	};
 
 	const userConfigObj = {
@@ -90,6 +103,9 @@ function updateDataForConfig() {
 		showBtnLongDesc: getBooleanUserConfig("showBtnLongDesc"),
 		showBtnShortDesc: getBooleanUserConfig("showBtnShortDesc"),
 		customCssStyle: getStringUserConfig("customCssStyle"),
+		preserveViewedFileState: getBooleanUserConfig("preserveViewedFileState"),
+		showCmd: getBooleanUserConfig("showCmd"),
+		zoomNum: getNumberUserConfig("zoomNum"),
 	};
 
 	data.config = mergeConfig(defaultConfigObj, userConfigObj);
@@ -100,6 +116,14 @@ function getBooleanUserConfig(key: string): boolean | undefined {
 		return undefined;
 	} else {
 		return userConfig.get(key) === "true" || userConfig.get(key) === true;
+	}
+}
+
+function getNumberUserConfig(key: string): number | undefined {
+	if (typeof userConfig.get(key) === "undefined") {
+		return undefined;
+	} else {
+		return Number(userConfig.get(key));
 	}
 }
 
@@ -215,7 +239,9 @@ function getOrCreateViewPanel() {
             <div id="main-container">
               <div id="diff2html-header">
                 <button id="refresh-btn">Refresh</button>
-                <button id="show-cmd-btn">Toggle CMD</button>
+                <button id="show-cmd-btn">Show CMD</button><button id="hide-cmd-btn">Hide CMD</button>
+                <span class="btn-group"><button id="zoom-in-btn"><i class="fa-solid fa-plus"></i></button>
+                <button id="zoom-out-btn"><i class="fa-solid fa-minus"></i></button></span>
               </div>
               <div id="diff2html-container"></div>
               <div id="diff2html-footer">
@@ -229,6 +255,7 @@ function getOrCreateViewPanel() {
 		panel.webview.html = htmlContent;
 	}
 
+	panel.reveal(vscode.ViewColumn.Two, true);
 	return panel;
 }
 
@@ -255,6 +282,12 @@ function handleMessageFromWebview(message: any) {
 		revertFile(message.relativeFilePath, showRevertFileWarning);
 	} else if (message.command === "copyFilePath") {
 		copyFilePath(message.relativeFilePath);
+	} else if (message.command === "toggleViewedFile") {
+		toggleViewedFile(message.relativeFilePath, message.isViewed);
+	} else if (message.command === "setZoomNum") {
+		setZoomNum(message.zoomNum);
+	} else if (message.command === "setShowCmd") {
+		setShowCmd(message.showCmd);
 	}
 }
 
@@ -295,6 +328,48 @@ function getUri(...pathComps: string[]): vscode.Uri {
 function copyFilePath(path: string) {
 	const filePath = utils.getAbsolutePath(path);
 	vscode.env.clipboard.writeText(filePath);
+}
+
+function toggleViewedFile(relativeFilePath: string, isViewed: boolean) {
+	if (!data) {
+		data = {};
+	}
+
+	if (!data?.userAction) {
+		data.userAction = { viewedFiles: [] };
+	}
+
+	if (isViewed) {
+		//add
+		data.userAction.viewedFiles = data.userAction.viewedFiles ? data.userAction.viewedFiles.concat([relativeFilePath]) : [relativeFilePath];
+	} else {
+		//remove
+		data.userAction.viewedFiles = data.userAction.viewedFiles ? data.userAction.viewedFiles.filter((x) => x !== relativeFilePath) : [];
+	}
+}
+
+function setZoomNum(zoomNum: number) {
+	if (!data) {
+		data = {};
+	}
+
+	if (!data?.userAction) {
+		data.userAction = { zoomNum: zoomNum };
+	} else {
+		data.userAction.zoomNum = zoomNum;
+	}
+}
+
+function setShowCmd(showCmd: boolean) {
+	if (!data) {
+		data = {};
+	}
+
+	if (!data?.userAction) {
+		data.userAction = { showCmd: showCmd };
+	} else {
+		data.userAction.showCmd = showCmd;
+	}
 }
 
 function openFile(relativePath: string) {
