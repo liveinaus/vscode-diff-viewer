@@ -22,7 +22,7 @@ For example, view Diff in HTML, revert a file ...
 - [x] Copy file path
 - [x] Toggle show/hide the command (i.e., git command), which was used to generate the diff result
 - [x] Support custom styling - better support for unknown themes
-- [ ] Support custom user commands, which can be defined by user
+- [x] Support custom user commands, which can be defined by user
 - [ ] Store users view settings (i.e., remember viewed button for files)
 - [ ] Support hunk action - e.g. revert hunk only code
 - [ ] Triggering extension commands from bottom toolbar
@@ -33,6 +33,7 @@ For example, view Diff in HTML, revert a file ...
 - `better-diff-viewer.viewDiffFile`: view diff for current .diff/.patch file
 - `better-diff-viewer.viewRepoGitDiff`: view Git diff for current repository
 - `better-diff-viewer.viewGitDiffForFile`: view Git diff for current file
+- `better-diff-viewer.viewCustomDiffFromCmd`: View Diff from a custom command on current repository
 
 ## Extension Settings
 

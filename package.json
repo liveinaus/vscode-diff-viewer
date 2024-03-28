@@ -29,6 +29,10 @@
 			{
 				"command": "better-diff-viewer.viewGitDiffForFile",
 				"title": "Better-diff-viewer: View Git Diff for current file"
+			},
+			{
+				"command": "better-diff-viewer.viewCustomDiffFromCmd",
+				"title": "Better-diff-viewer: View Diff from a custom command"
 			}
 		]
 	},

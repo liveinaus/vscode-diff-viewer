@@ -5,6 +5,7 @@ import * as utils from "./utils";
 let extensionPath: string;
 let panel: vscode.WebviewPanel | undefined;
 let data: DiffViewerData = {};
+let lastUserCustomCmd: string;
 
 type DiffViewerData = {
 	cmd?: string;
@@ -25,7 +26,12 @@ type BetterDiffViewerOptions = {
 export function activate(context: vscode.ExtensionContext) {
 	extensionPath = context.extensionPath;
 	updateDataForConfig();
-	context.subscriptions.push(vscode.commands.registerCommand("better-diff-viewer.viewDiffFile", viewDiffFile), vscode.commands.registerCommand("better-diff-viewer.viewRepoGitDiff", viewRepoGitDiff), vscode.commands.registerCommand("better-diff-viewer.viewGitDiffForFile", viewGitDiffForFile));
+	context.subscriptions.push(
+		vscode.commands.registerCommand("better-diff-viewer.viewDiffFile", viewDiffFile),
+		vscode.commands.registerCommand("better-diff-viewer.viewRepoGitDiff", viewRepoGitDiff),
+		vscode.commands.registerCommand("better-diff-viewer.viewGitDiffForFile", viewGitDiffForFile),
+		vscode.commands.registerCommand("better-diff-viewer.viewCustomDiffFromCmd", viewCustomDiffFromCmd)
+	);
 	vscode.workspace.onDidSaveTextDocument(autoRefresh);
 	vscode.workspace.onDidOpenTextDocument(actionWhenFileExtensionDetected);
 }
@@ -132,6 +138,24 @@ function viewGitDiffForFile() {
 		doAction("showDiffContent", data);
 	} else {
 		utils.throwError("cannot find file path from current active text editor");
+	}
+}
+
+async function viewCustomDiffFromCmd() {
+	const preCmd = `cd ${utils.getRepoPath()};`;
+	const customCmd = await vscode.window.showInputBox({
+		prompt: "Enter your custom diff command",
+		placeHolder: "For example: git diff HEAD <file_name>",
+		value: lastUserCustomCmd, //default to last custom cmd
+	});
+
+	if (customCmd) {
+		getOrCreateViewPanel();
+		updateDataByCmd(`${preCmd} ${customCmd}`);
+		doAction("showDiffContent", data);
+		lastUserCustomCmd = customCmd;
+	} else {
+		vscode.window.showWarningMessage("No diff command provided.");
 	}
 }
 
