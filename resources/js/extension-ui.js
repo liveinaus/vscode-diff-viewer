@@ -22,13 +22,72 @@ function addButtonListeners() {
 	jQuery("#refresh-btn").on("click", () => {
 		refresh(true);
 	});
-	jQuery("#show-cmd-btn").on("click", toggleCmdViewer);
+
+	jQuery("#show-cmd-btn").on("click", () => {
+		setShowCmd(true);
+	});
+
+	jQuery("#hide-cmd-btn").on("click", () => {
+		setShowCmd(false);
+	});
+
 	jQuery("#diff2html-container").on("click", ".custom-git-btn", clickedCustomGitBtn);
+
+	jQuery("#zoom-in-btn").on("click", () => {
+		setZoom(true);
+	});
+	jQuery("#zoom-out-btn").on("click", () => {
+		setZoom(false);
+	});
+}
+
+function setShowCmd(showCmd) {
+	const command = "setShowCmd";
+	displayShowCmd(showCmd);
+	vscode.postMessage({ command, showCmd });
+}
+
+function displayShowCmd(showCmd) {
+	jQuery("#cmd-viewer").toggle(showCmd);
+	jQuery("#show-cmd-btn").toggle(!showCmd);
+	jQuery("#hide-cmd-btn").toggle(showCmd);
+}
+
+function setZoom(isIn) {
+	const step = 0.1;
+	const command = "setZoomNum";
+	let zoomNum = data.zoomNum;
+	if (isIn) {
+		zoomNum += step;
+	} else if (data.zoomNum > step) {
+		zoomNum -= step;
+	}
+	displayZoomNum(zoomNum);
+	vscode.postMessage({ command, zoomNum });
+}
+
+function displayZoomNum(zoomNum) {
+	jQuery("#diff2html-container").css("zoom", zoomNum).css("transform", `scale${zoomNum}`).css("-moz-transform", `scale${zoomNum}`);
+	data.zoomNum = zoomNum;
+}
+
+function displayNoCmd() {
+	jQuery("#show-cmd-btn").toggle(false);
+	jQuery("#hide-cmd-btn").toggle(false);
 }
 
 function showDiff2HtmlUi() {
-	const { diffContent, config, cmd } = data;
+	const { diffContent, config, cmd, userAction } = data;
 	jQuery("#custom-css-style").html(config.customCssStyle);
+
+	if (cmd) {
+		displayShowCmd(Boolean(userAction?.showCmd));
+	} else {
+		displayNoCmd(); //No CMD is applicable
+	}
+
+	displayZoomNum(userAction?.zoomNum ? userAction.zoomNum : 0.9);
+
 	diff2htmlUi = new Diff2HtmlUI(jQuery(diff2htmlContainerId)[0], diffContent, config["diff2html-ui"]);
 	diff2htmlUi.draw();
 	if (cmd) {
@@ -77,10 +136,6 @@ function clickedCustomGitBtn(evt) {
 function refresh(isForced = false) {
 	const command = "refresh";
 	vscode.postMessage({ command, isForced });
-}
-
-function toggleCmdViewer() {
-	jQuery("#cmd-viewer").toggle();
 }
 
 function addUiElementsToDiff2HtmlUi() {

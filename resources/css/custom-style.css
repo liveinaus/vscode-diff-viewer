@@ -1,9 +1,6 @@
 #diff2html-container {
 	background: white;
-	zoom: 0.9;
-	transform: scale(0.9);
 	transform-origin: 0 0;
-	-moz-transform: scale(0.9);
 	-moz-transform-origin: 0 0;
 }
 
@@ -44,4 +41,12 @@
 .btn-icon,
 .btn-short-desc {
 	display: none;
+}
+
+#diff2html-header .btn-group > button {
+	margin: 0px;
+}
+
+.d2h-file-name {
+	color: purple;
 }
