@@ -24,11 +24,13 @@ For example, view Diff in HTML, revert a file ...
 - [x] Support custom styling - better support for unknown themes
 - [x] Support custom user commands, which can be defined by user
 - [x] Store users view actions (i.e., remember viewed button for files)
+- [ ] View content of a GIT commit
 - [ ] Zoom in/out
 - [ ] Find text
 - [ ] Specify panel location (i.e. in editor or panel)
 - [ ] Support hunk action - e.g. revert hunk only code
 - [ ] Triggering extension commands from bottom toolbar
+- [ ] Show and interact with git log tree
 
 ## Commands
 
