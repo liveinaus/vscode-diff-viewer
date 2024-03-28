@@ -1,20 +1,14 @@
 const vscode = acquireVsCodeApi();
-
-const testVariableA = "test";
 const diff2htmlContainerId = "#diff2html-container";
 let diff2htmlUi;
-
 let data = {};
 
 window.addEventListener("message", (event) => {
 	const uiMessage = event.data;
 	if (uiMessage.command === "showDiffContent") {
-		if (uiMessage?.data?.diffContent) {
+		if (uiMessage?.data) {
 			data = uiMessage?.data;
 			showDiff2HtmlUi();
-		} else {
-			data = uiMessage?.data;
-			jQuery(diff2htmlContainerId).html("<span id='no-diff-available'>No Diff Available.</span>");
 		}
 	}
 });
@@ -34,7 +28,6 @@ function addButtonListeners() {
 
 function showDiff2HtmlUi() {
 	const { diffContent, config, cmd } = data;
-	console.log("config", config);
 	jQuery("#custom-css-style").html(config.customCssStyle);
 	diff2htmlUi = new Diff2HtmlUI(jQuery(diff2htmlContainerId)[0], diffContent, config["diff2html-ui"]);
 	diff2htmlUi.draw();
@@ -48,6 +41,30 @@ function showDiff2HtmlUi() {
 	jQuery(".custom-git-btn .btn-icon").toggle(config.showBtnIcon);
 	jQuery(".custom-git-btn .btn-long-desc").toggle(config.showBtnLongDesc);
 	jQuery(".custom-git-btn .btn-short-desc").toggle(config.showBtnShortDesc);
+
+	if (config.preserveViewedFileState) {
+		prepareFileViewed();
+	}
+}
+
+function prepareFileViewed() {
+	//Restore viewed file status
+	jQuery(".d2h-file-collapse-input").each(function () {
+		const relativeFilePath = jQuery(this).closest(".d2h-file-wrapper").find(".d2h-file-name").html();
+		if (data && data.userAction && data.userAction.viewedFiles && data.userAction.viewedFiles.indexOf(relativeFilePath) > -1) {
+			jQuery(this).prop("checked", true);
+			jQuery(this).closest(".d2h-file-collapse").addClass("d2h-selected");
+			jQuery(this).closest(".d2h-file-wrapper").find(".d2h-file-diff").addClass("d2h-d-none");
+		}
+	});
+
+	//Add event listener
+	jQuery(".d2h-file-collapse-input").change(function (evt) {
+		const command = "toggleViewedFile";
+		const isViewed = this.checked;
+		const relativeFilePath = jQuery(this).closest(".d2h-file-wrapper").find(".d2h-file-name").html();
+		vscode.postMessage({ command, relativeFilePath, isViewed });
+	});
 }
 
 function clickedCustomGitBtn(evt) {

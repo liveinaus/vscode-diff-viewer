@@ -11,16 +11,22 @@ type DiffViewerData = {
 	cmd?: string;
 	diffContent?: string;
 	config?: BetterDiffViewerOptions;
+	userAction?: UserAction;
 };
 let userConfig: vscode.WorkspaceConfiguration;
 
+type UserAction = {
+	viewedFiles?: string[];
+};
+
 type BetterDiffViewerOptions = {
-	"diff2html-ui": {};
-	customCssStyle: string;
 	isAutoRefresh?: boolean;
 	showBtnIcon?: boolean;
 	showBtnLongDesc?: boolean;
 	showBtnShortDesc?: boolean;
+	customCssStyle: string;
+	preserveViewedFileState?: boolean;
+	"diff2html-ui": {};
 };
 
 export function activate(context: vscode.ExtensionContext) {
@@ -82,6 +88,7 @@ function updateDataForConfig() {
 		showBtnLongDesc: true,
 		showBtnShortDesc: false,
 		customCssStyle: "",
+		preserveViewedFileState: true,
 	};
 
 	const userConfigObj = {
@@ -90,6 +97,7 @@ function updateDataForConfig() {
 		showBtnLongDesc: getBooleanUserConfig("showBtnLongDesc"),
 		showBtnShortDesc: getBooleanUserConfig("showBtnShortDesc"),
 		customCssStyle: getStringUserConfig("customCssStyle"),
+		preserveViewedFileState: getBooleanUserConfig("preserveViewedFileState"),
 	};
 
 	data.config = mergeConfig(defaultConfigObj, userConfigObj);
@@ -255,6 +263,8 @@ function handleMessageFromWebview(message: any) {
 		revertFile(message.relativeFilePath, showRevertFileWarning);
 	} else if (message.command === "copyFilePath") {
 		copyFilePath(message.relativeFilePath);
+	} else if (message.command === "toggleViewedFile") {
+		toggleViewedFile(message.relativeFilePath, message.isViewed);
 	}
 }
 
@@ -295,6 +305,24 @@ function getUri(...pathComps: string[]): vscode.Uri {
 function copyFilePath(path: string) {
 	const filePath = utils.getAbsolutePath(path);
 	vscode.env.clipboard.writeText(filePath);
+}
+
+function toggleViewedFile(relativeFilePath: string, isViewed: boolean) {
+	if (!data) {
+		data = {};
+	}
+
+	if (!data?.userAction) {
+		data.userAction = { viewedFiles: [] };
+	}
+
+	if (isViewed) {
+		//add
+		data.userAction.viewedFiles = data.userAction.viewedFiles ? data.userAction.viewedFiles.concat([relativeFilePath]) : [relativeFilePath];
+	} else {
+		//remove
+		data.userAction.viewedFiles = data.userAction.viewedFiles ? data.userAction.viewedFiles.filter((x) => x !== relativeFilePath) : [];
+	}
 }
 
 function openFile(relativePath: string) {
