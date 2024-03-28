@@ -3,6 +3,7 @@
 	"displayName": "better-diff-viewer",
 	"description": "view diff in html",
 	"icon": "images/extension-icon.png",
+	"publisher": "SamWang",
 	"author": "Sam Wang",
 	"version": "0.0.1",
 	"engines": {

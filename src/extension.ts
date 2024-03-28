@@ -29,7 +29,6 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 function actionWhenFileExtensionDetected(document: any) {
-	console.log("actionWhenFileExtensionDetected" + document.fileName);
 	if (document.languageId === "diff" || document.languageId === "plaintext") {
 		if (document.fileName.endsWith("diff") || document.fileName.endsWith(".patch")) {
 			const textDoc: vscode.TextDocument = document as vscode.TextDocument;

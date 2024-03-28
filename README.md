@@ -2,6 +2,8 @@
 
 View diff in HTML via Diff2Html-UI (https://github.com/rtfpessoa/diff2html).
 
+![alt text](images/screenshot-0.0.1.png)
+
 ## Rationale
 
 Creating a similar diff view panel to Source Tree (`https://www.sourcetreeapp.com/`).
