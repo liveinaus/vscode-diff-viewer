@@ -237,6 +237,7 @@ function getOrCreateViewPanel() {
 		panel.webview.html = htmlContent;
 	}
 
+	panel.reveal(vscode.ViewColumn.Two, true);
 	return panel;
 }
 
