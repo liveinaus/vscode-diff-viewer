@@ -23,6 +23,9 @@ For example, view Diff in HTML, revert a file ...
 - [x] Toggle show/hide the command (i.e., git command), which was used to generate the diff result
 - [ ] Support custom user commands, which can be defined by user
 - [ ] Store users view settings (i.e., remember viewed button for files)
+- [ ] Support hunk action - e.g. revert hunk only code
+- [ ] Support custom styling - better support for unknown themes
+- [ ] Triggering extension commands from bottom toolbar
 
 ## Available commands
 
