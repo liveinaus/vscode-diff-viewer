@@ -34,6 +34,8 @@ function addButtonListeners() {
 
 function showDiff2HtmlUi() {
 	const { diffContent, config, cmd } = data;
+	console.log("config", config);
+	jQuery("#custom-css-style").html(config.customCssStyle);
 	diff2htmlUi = new Diff2HtmlUI(jQuery(diff2htmlContainerId)[0], diffContent, config["diff2html-ui"]);
 	diff2htmlUi.draw();
 	if (cmd) {
