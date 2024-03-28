@@ -1,71 +1,71 @@
-# better-diff-viewer README
+# Better Diff Viewer
 
-This is the README for your extension "better-diff-viewer". After writing up a brief description, we recommend including the following sections.
+View diff in HTML via Diff2Html-UI (https://github.com/rtfpessoa/diff2html).
 
-## Features
+## Rationale
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+Creating a similar diff view panel to Source Tree (`https://www.sourcetreeapp.com/`).
+The aim is add most of the features which Source Tree diff viewer can do.
+For example, view Diff in HTML, revert a file ...
 
-For example if there is an image subfolder under your extension project workspace:
+## Features & TODOs
 
-\!\[feature X\]\(images/feature-x.png\)
+- [x] View .diff/.patch or git diff in Diff2HTML-UI
+- [x] View diff for uncommitted changes
+- [x] Dark/light/auto mode support
+- [x] Diff2Html-UI user configurable settings
+- [x] Trigger content refresh manually
+- [x] Open a file in editor
+- [x] Revert a file
+- [x] Copy file path
+- [x] Toggle show/hide the command (i.e., git command), which was used to generate the diff result
+- [ ] Support custom user commands, which can be defined by user
+- [ ] Store users view settings (i.e., remember viewed button for files)
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+## Available commands
 
-## Requirements
-
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+- `better-diff-viewer.viewDiffFile`: view diff for current .diff/.patch file
+- `better-diff-viewer.viewRepoGitDiff`: view Git diff for current repository
+- `better-diff-viewer.viewGitDiffForFile`: view Git diff for current file
 
 ## Extension Settings
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+- `better-diff-viewer.isAutoRefresh: true` toggle if the view needs to be refreshed when any file get saved
+- `better-diff-viewer.showBtnIcon: true` show button icon
+- `better-diff-viewer.showBtnLongDesc: true` show button long description
+- `better-diff-viewer.showBtnShortDesc: false` show button short description (for saving spaces)
 
-For example:
+- `better-diff-viewer.diff2html-ui.outputFormat`: see diff2html-ui for available values
+- `better-diff-viewer.diff2html-ui.drawFileList`: see diff2html-ui for available values
+- `better-diff-viewer.diff2html-ui.srcPrefix`: see diff2html-ui for available values
+- `better-diff-viewer.diff2html-ui.dstPrefix`: see diff2html-ui for available values
+- `better-diff-viewer.diff2html-ui.diffMaxChanges`: see diff2html-ui for available values
+- `better-diff-viewer.diff2html-ui.diffMaxLineLength`: see diff2html-ui for available values
+- `better-diff-viewer.diff2html-ui.diffTooBigMessage`: see diff2html-ui for available values
+- `better-diff-viewer.diff2html-ui.matching`: see diff2html-ui for available values
+- `better-diff-viewer.diff2html-ui.matchWordsThreshold`: see diff2html-ui for available values
+- `better-diff-viewer.diff2html-ui.maxLineLengthHighlight`: see diff2html-ui for available values
+- `better-diff-viewer.diff2html-ui.diffStyle`: see diff2html-ui for available values
+- `better-diff-viewer.diff2html-ui.renderNothingWhenEmpty`: see diff2html-ui for available values
+- `better-diff-viewer.diff2html-ui.matchingMaxComparisons`: see diff2html-ui for available values
+- `better-diff-viewer.diff2html-ui.maxLineSizeInBlockForComparison`: see diff2html-ui for available values
+- `better-diff-viewer.diff2html-ui.compiledTemplates`: see diff2html-ui for available values
+- `better-diff-viewer.diff2html-ui.rawTemplates`: see diff2html-ui for available values
+- `better-diff-viewer.diff2html-ui.highlightLanguages`: see diff2html-ui for available values
+- `better-diff-viewer.diff2html-ui.colorScheme`: see diff2html-ui for available values
+- `better-diff-viewer.diff2html-ui.synchronisedScroll`: see diff2html-ui for available values
+- `better-diff-viewer.diff2html-ui.highlight`: see diff2html-ui for available values
+- `better-diff-viewer.diff2html-ui.fileListToggle`: see diff2html-ui for available values
+- `better-diff-viewer.diff2html-ui.fileListStartVisible`: see diff2html-ui for available values
+- `better-diff-viewer.diff2html-ui.fileContentToggle`: see diff2html-ui for available values
+- `better-diff-viewer.diff2html-ui.stickyFileHeaders`: see diff2html-ui for available values
 
-This extension contributes the following settings:
+## Thanks to Diff2Html
 
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
+https://github.com/rtfpessoa/diff2html
 
-## Known Issues
+## LICENSE
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
-
-## Release Notes
-
-Users appreciate release notes as you update your extension.
-
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
-
----
-
-## Following extension guidelines
-
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
-
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
-
-## For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
+GNU General Public License v3.0
 
 **Enjoy!**

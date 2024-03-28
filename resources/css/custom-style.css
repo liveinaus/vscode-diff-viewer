@@ -1,0 +1,47 @@
+#diff2html-container {
+	background: white;
+	zoom: 0.9;
+	transform: scale(0.9);
+	transform-origin: 0 0;
+	-moz-transform: scale(0.9);
+	-moz-transform-origin: 0 0;
+}
+
+#diff2html-header {
+	margin-top: 5px;
+	margin-bottom: 5px;
+}
+
+#diff2html-header button {
+	margin-right: 5px;
+}
+
+.custom-git-btn {
+	margin-right: 5px;
+	display: flex;
+	height: 100%;
+	line-height: 30px;
+}
+
+#no-diff-available {
+	font-weight: bold;
+	font-size: 20px;
+	line-height: 40px;
+	margin-left: 10px;
+}
+
+.btn-icon {
+	margin-left: 2px;
+	margin-right: 2px;
+}
+
+.btn-long-desc,
+.btn-short-desc {
+	margin-left: 5px;
+	margin-right: 5px;
+}
+
+.btn-icon,
+.btn-short-desc {
+	display: none;
+}
