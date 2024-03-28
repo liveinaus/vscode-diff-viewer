@@ -5,6 +5,7 @@ import * as utils from "./utils";
 let extensionPath: string;
 let panel: vscode.WebviewPanel | undefined;
 let data: DiffViewerData = {};
+let lastUserCustomCmd: string;
 
 type DiffViewerData = {
 	cmd?: string;
@@ -15,6 +16,7 @@ let userConfig: vscode.WorkspaceConfiguration;
 
 type BetterDiffViewerOptions = {
 	"diff2html-ui": {};
+	customCssStyle: string;
 	isAutoRefresh?: boolean;
 	showBtnIcon?: boolean;
 	showBtnLongDesc?: boolean;
@@ -23,7 +25,13 @@ type BetterDiffViewerOptions = {
 
 export function activate(context: vscode.ExtensionContext) {
 	extensionPath = context.extensionPath;
-	context.subscriptions.push(vscode.commands.registerCommand("better-diff-viewer.viewDiffFile", viewDiffFile), vscode.commands.registerCommand("better-diff-viewer.viewRepoGitDiff", viewRepoGitDiff), vscode.commands.registerCommand("better-diff-viewer.viewGitDiffForFile", viewGitDiffForFile));
+	updateDataForConfig();
+	context.subscriptions.push(
+		vscode.commands.registerCommand("better-diff-viewer.viewDiffFile", viewDiffFile),
+		vscode.commands.registerCommand("better-diff-viewer.viewRepoGitDiff", viewRepoGitDiff),
+		vscode.commands.registerCommand("better-diff-viewer.viewGitDiffForFile", viewGitDiffForFile),
+		vscode.commands.registerCommand("better-diff-viewer.viewCustomDiffFromCmd", viewCustomDiffFromCmd)
+	);
 	vscode.workspace.onDidSaveTextDocument(autoRefresh);
 	vscode.workspace.onDidOpenTextDocument(actionWhenFileExtensionDetected);
 }
@@ -73,6 +81,7 @@ function updateDataForConfig() {
 		showBtnIcon: true,
 		showBtnLongDesc: true,
 		showBtnShortDesc: false,
+		customCssStyle: "",
 	};
 
 	const userConfigObj = {
@@ -80,6 +89,7 @@ function updateDataForConfig() {
 		showBtnIcon: getBooleanUserConfig("showBtnIcon"),
 		showBtnLongDesc: getBooleanUserConfig("showBtnLongDesc"),
 		showBtnShortDesc: getBooleanUserConfig("showBtnShortDesc"),
+		customCssStyle: getStringUserConfig("customCssStyle"),
 	};
 
 	data.config = mergeConfig(defaultConfigObj, userConfigObj);
@@ -131,6 +141,24 @@ function viewGitDiffForFile() {
 	}
 }
 
+async function viewCustomDiffFromCmd() {
+	const preCmd = `cd ${utils.getRepoPath()};`;
+	const customCmd = await vscode.window.showInputBox({
+		prompt: "Enter your custom diff command",
+		placeHolder: "For example: git diff HEAD <file_name>",
+		value: lastUserCustomCmd, //default to last custom cmd
+	});
+
+	if (customCmd) {
+		getOrCreateViewPanel();
+		updateDataByCmd(`${preCmd} ${customCmd}`);
+		doAction("showDiffContent", data);
+		lastUserCustomCmd = customCmd;
+	} else {
+		vscode.window.showWarningMessage("No diff command provided.");
+	}
+}
+
 function viewRepoGitDiff() {
 	getOrCreateViewPanel();
 	updateDataByCmd(utils.viewGitDiffForRepo());
@@ -156,49 +184,51 @@ function viewDiffDocument(document: vscode.TextDocument) {
 function getOrCreateViewPanel() {
 	if (!panel) {
 		panel = vscode.window.createWebviewPanel("diffViewer", "Diff Viewer", { viewColumn: vscode.ViewColumn.Two, preserveFocus: true }, { enableScripts: true });
-		const htmlContent = `
-          <!DOCTYPE html>
-          <html>
-          <head>
-              <meta charset="UTF-8">
-              <meta name="viewport" content="width=device-width, initial-scale=1.0">
-              <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-              <title>Diff Viewer</title>
-
-							<link rel="stylesheet" type="text/css" href="${getResourcesUri("css", "fontawesome.all.min.css")}"/>
-              <link rel="stylesheet" type="text/css" href="${getResourcesUri("css", "highlight.js-github.min.css")}"/>
-              <link rel="stylesheet" type="text/css" href="${getResourcesUri("css", "diff2html.min.css")}"/>
-              <link rel="stylesheet" type="text/css" href="${getResourcesUri("css", "custom-style.css")}"/>
-
-							<script type="text/javascript" src="${getResourcesUri("js", "fontawesome.all.min.js")}"></script>
-							<script type="text/javascript" src="${getResourcesUri("js", "jquery.min.js")}"></script>
-              <script type="text/javascript" src="${getResourcesUri("js", "diff2html-ui.min.js")}"></script>
-              <script type="text/javascript" src="${getResourcesUri("js", "extension-ui.js")}"></script>
-
-          </head>
-          <body>
-							<div id="main-container">
-								<div id="diff2html-header">
-									<button id="refresh-btn">Refresh</button>
-									<button id="show-cmd-btn">Toggle CMD</button>
-								</div>
-								<div id="diff2html-container"></div>
-								<div id="diff2html-footer">
-									<div id="cmd-viewer"><span id="cmd-content"></span></div>
-								</div>
-							</div>
-          </body>
-          </html>
-      `;
-
-		// Set the HTML content
-		panel.webview.html = htmlContent;
 		panel.onDidDispose(() => {
 			panel = undefined;
 		});
 		// Subscribe to messages from the webview
 		panel.webview.onDidReceiveMessage(handleMessageFromWebview);
+
+		const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+            <title>Diff Viewer</title>
+
+            <link rel="stylesheet" type="text/css" href="${getResourcesUri("css", "fontawesome.all.min.css")}"/>
+            <link rel="stylesheet" type="text/css" href="${getResourcesUri("css", "highlight.js-github.min.css")}"/>
+            <link rel="stylesheet" type="text/css" href="${getResourcesUri("css", "diff2html.min.css")}"/>
+            <link rel="stylesheet" type="text/css" href="${getResourcesUri("css", "custom-style.css")}"/>
+
+            <script type="text/javascript" src="${getResourcesUri("js", "fontawesome.all.min.js")}"></script>
+            <script type="text/javascript" src="${getResourcesUri("js", "jquery.min.js")}"></script>
+            <script type="text/javascript" src="${getResourcesUri("js", "diff2html-ui.min.js")}"></script>
+            <script type="text/javascript" src="${getResourcesUri("js", "extension-ui.js")}"></script>
+
+            <style id="custom-css-style"></style>
+        </head>
+        <body>
+            <div id="main-container">
+              <div id="diff2html-header">
+                <button id="refresh-btn">Refresh</button>
+                <button id="show-cmd-btn">Toggle CMD</button>
+              </div>
+              <div id="diff2html-container"></div>
+              <div id="diff2html-footer">
+                <div id="cmd-viewer"><span id="cmd-content"></span></div>
+              </div>
+            </div>
+        </body>
+        </html>
+    `;
+		//update htmlContent by settings
+		panel.webview.html = htmlContent;
 	}
+
 	return panel;
 }
 
