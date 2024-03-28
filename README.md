@@ -26,6 +26,7 @@ For example, view Diff in HTML, revert a file ...
 - [ ] Support hunk action - e.g. revert hunk only code
 - [ ] Support custom styling - better support for unknown themes
 - [ ] Triggering extension commands from bottom toolbar
+- [ ] Specify panel location (i.e. in editor or panel)
 
 ## Available commands
 
@@ -35,35 +36,36 @@ For example, view Diff in HTML, revert a file ...
 
 ## Extension Settings
 
-- `better-diff-viewer.isAutoRefresh: true` toggle if the view needs to be refreshed when any file get saved
-- `better-diff-viewer.showBtnIcon: true` show button icon
-- `better-diff-viewer.showBtnLongDesc: true` show button long description
-- `better-diff-viewer.showBtnShortDesc: false` show button short description (for saving spaces)
-
-- `better-diff-viewer.diff2html-ui.outputFormat`: see diff2html-ui for available values
-- `better-diff-viewer.diff2html-ui.drawFileList`: see diff2html-ui for available values
-- `better-diff-viewer.diff2html-ui.srcPrefix`: see diff2html-ui for available values
-- `better-diff-viewer.diff2html-ui.dstPrefix`: see diff2html-ui for available values
-- `better-diff-viewer.diff2html-ui.diffMaxChanges`: see diff2html-ui for available values
-- `better-diff-viewer.diff2html-ui.diffMaxLineLength`: see diff2html-ui for available values
-- `better-diff-viewer.diff2html-ui.diffTooBigMessage`: see diff2html-ui for available values
-- `better-diff-viewer.diff2html-ui.matching`: see diff2html-ui for available values
-- `better-diff-viewer.diff2html-ui.matchWordsThreshold`: see diff2html-ui for available values
-- `better-diff-viewer.diff2html-ui.maxLineLengthHighlight`: see diff2html-ui for available values
-- `better-diff-viewer.diff2html-ui.diffStyle`: see diff2html-ui for available values
-- `better-diff-viewer.diff2html-ui.renderNothingWhenEmpty`: see diff2html-ui for available values
-- `better-diff-viewer.diff2html-ui.matchingMaxComparisons`: see diff2html-ui for available values
-- `better-diff-viewer.diff2html-ui.maxLineSizeInBlockForComparison`: see diff2html-ui for available values
-- `better-diff-viewer.diff2html-ui.compiledTemplates`: see diff2html-ui for available values
-- `better-diff-viewer.diff2html-ui.rawTemplates`: see diff2html-ui for available values
-- `better-diff-viewer.diff2html-ui.highlightLanguages`: see diff2html-ui for available values
-- `better-diff-viewer.diff2html-ui.colorScheme`: see diff2html-ui for available values
-- `better-diff-viewer.diff2html-ui.synchronisedScroll`: see diff2html-ui for available values
-- `better-diff-viewer.diff2html-ui.highlight`: see diff2html-ui for available values
-- `better-diff-viewer.diff2html-ui.fileListToggle`: see diff2html-ui for available values
-- `better-diff-viewer.diff2html-ui.fileListStartVisible`: see diff2html-ui for available values
-- `better-diff-viewer.diff2html-ui.fileContentToggle`: see diff2html-ui for available values
-- `better-diff-viewer.diff2html-ui.stickyFileHeaders`: see diff2html-ui for available values
+| Command                                                         | Description                                                      |
+| --------------------------------------------------------------- | ---------------------------------------------------------------- |
+| better-diff-viewer.isAutoRefresh: true                          | toggle if the view needs to be refreshed when any file get saved |
+| better-diff-viewer.showBtnIcon: true                            | show button icon                                                 |
+| better-diff-viewer.showBtnLongDesc: true                        | show button long description                                     |
+| better-diff-viewer.showBtnShortDesc: false                      | show button short description (for saving spaces)                |
+| better-diff-viewer.diff2html-ui.outputFormat                    | see diff2html-ui for available values                            |
+| better-diff-viewer.diff2html-ui.drawFileList                    | see diff2html-ui for available values                            |
+| better-diff-viewer.diff2html-ui.srcPrefix                       | see diff2html-ui for available values                            |
+| better-diff-viewer.diff2html-ui.dstPrefix                       | see diff2html-ui for available values                            |
+| better-diff-viewer.diff2html-ui.diffMaxChanges                  | see diff2html-ui for available values                            |
+| better-diff-viewer.diff2html-ui.diffMaxLineLength               | see diff2html-ui for available values                            |
+| better-diff-viewer.diff2html-ui.diffTooBigMessage               | see diff2html-ui for available values                            |
+| better-diff-viewer.diff2html-ui.matching                        | see diff2html-ui for available values                            |
+| better-diff-viewer.diff2html-ui.matchWordsThreshold             | see diff2html-ui for available values                            |
+| better-diff-viewer.diff2html-ui.maxLineLengthHighlight          | see diff2html-ui for available values                            |
+| better-diff-viewer.diff2html-ui.diffStyle                       | see diff2html-ui for available values                            |
+| better-diff-viewer.diff2html-ui.renderNothingWhenEmpty          | see diff2html-ui for available values                            |
+| better-diff-viewer.diff2html-ui.matchingMaxComparisons          | see diff2html-ui for available values                            |
+| better-diff-viewer.diff2html-ui.maxLineSizeInBlockForComparison | see diff2html-ui for available values                            |
+| better-diff-viewer.diff2html-ui.compiledTemplates               | see diff2html-ui for available values                            |
+| better-diff-viewer.diff2html-ui.rawTemplates                    | see diff2html-ui for available values                            |
+| better-diff-viewer.diff2html-ui.highlightLanguages              | see diff2html-ui for available values                            |
+| better-diff-viewer.diff2html-ui.colorScheme                     | see diff2html-ui for available values                            |
+| better-diff-viewer.diff2html-ui.synchronisedScroll              | see diff2html-ui for available values                            |
+| better-diff-viewer.diff2html-ui.highlight                       | see diff2html-ui for available values                            |
+| better-diff-viewer.diff2html-ui.fileListToggle                  | see diff2html-ui for available values                            |
+| better-diff-viewer.diff2html-ui.fileListStartVisible            | see diff2html-ui for available values                            |
+| better-diff-viewer.diff2html-ui.fileContentToggle               | see diff2html-ui for available values                            |
+| better-diff-viewer.diff2html-ui.stickyFileHeaders               | see diff2html-ui for available values                            |
 
 ## Installation
 
@@ -75,7 +77,7 @@ For example, view Diff in HTML, revert a file ...
 
 ## Author
 
-Sam Wang at [https://liveinaus.com](https://liveinaus.com)
+Sam Wang - [https://liveinaus.com](https://liveinaus.com)
 
 ## LICENSE
 
