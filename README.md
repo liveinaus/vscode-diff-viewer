@@ -10,7 +10,7 @@ Creating a similar diff view panel to [Source Tree](https://www.sourcetreeapp.co
 The aim is to add most of the features which [Source Tree](https://www.sourcetreeapp.com) diff viewer can do.
 For example, view Diff in HTML, revert a file ...
 
-## Features & TODOs
+## Features
 
 - [x] View .diff/.patch or git diff in Diff2HTML-UI
 - [x] View diff for uncommitted changes
@@ -30,14 +30,14 @@ For example, view Diff in HTML, revert a file ...
 - [ ] Support hunk action - e.g. revert hunk only code
 - [ ] Triggering extension commands from bottom toolbar
 
-## Available commands
+## Commands
 
 - `better-diff-viewer.viewDiffFile`: view diff for current .diff/.patch file
 - `better-diff-viewer.viewRepoGitDiff`: view Git diff for current repository
 - `better-diff-viewer.viewGitDiffForFile`: view Git diff for current file
 - `better-diff-viewer.viewCustomDiffFromCmd`: View Diff from a custom command on current repository
 
-## Extension Settings
+## Settings
 
 | Command                                                         | Default Value | Description                                                                                                             |
 | --------------------------------------------------------------- | ------------- | ----------------------------------------------------------------------------------------------------------------------- |
@@ -76,7 +76,7 @@ For example, view Diff in HTML, revert a file ...
 
 ## Installation
 
-[Open at Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=SamWang.better-diff-viewer)
+[Install from Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=SamWang.better-diff-viewer)
 
 ## Thanks to Diff2Html
 
