@@ -239,7 +239,7 @@ function viewDiffDocument(document: vscode.TextDocument) {
 
 function getOrCreateViewPanel() {
 	if (!panel) {
-		panel = vscode.window.createWebviewPanel("diffViewer", "Diff Viewer", { viewColumn: vscode.ViewColumn.Two, preserveFocus: true }, { enableScripts: true, enableFindWidget: true });
+		panel = vscode.window.createWebviewPanel("diffViewer", "Diff Viewer", { viewColumn: vscode.ViewColumn.Beside, preserveFocus: true }, { enableScripts: true, enableFindWidget: true });
 		panel.onDidDispose(() => {
 			panel = undefined;
 		});
@@ -287,7 +287,7 @@ function getOrCreateViewPanel() {
 		panel.webview.html = htmlContent;
 	}
 
-	panel.reveal(vscode.ViewColumn.Two, true);
+	panel.reveal(vscode.ViewColumn.Beside, true);
 	return panel;
 }
 
