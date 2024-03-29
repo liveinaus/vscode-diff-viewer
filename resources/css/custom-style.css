@@ -1,5 +1,34 @@
+/* Color CSS */
 #diff2html-container {
 	background: white;
+}
+
+.bdv-cs-dark #diff2html-container {
+	background: black;
+}
+
+.d2h-file-name {
+	color: blue;
+}
+
+.bdv-cs-dark .d2h-file-name {
+	color: lightgreen;
+}
+
+.bdv-cs-dark button,
+.bdv-cs-dark .d2h-file-collapse {
+	background-color: #333;
+	color: #fff;
+	transition: background-color 0.3s, color 0.3s;
+}
+
+.bdv-cs-dark button:hover,
+.bdv-cs-dark .d2h-file-collapse:hover {
+	background-color: #555;
+}
+
+/* Normal CSS */
+#diff2html-container {
 	transform-origin: 0 0;
 	-moz-transform-origin: 0 0;
 }
@@ -45,8 +74,4 @@
 
 #diff2html-header .btn-group > button {
 	margin: 0px;
-}
-
-.d2h-file-name {
-	color: purple;
 }

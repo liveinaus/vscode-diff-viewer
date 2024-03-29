@@ -5,7 +5,7 @@
 	"icon": "images/extension-icon.png",
 	"publisher": "SamWang",
 	"author": "Sam Wang",
-	"version": "0.0.6",
+	"version": "0.0.7",
 	"engines": {
 		"vscode": "^1.87.0"
 	},
@@ -24,7 +24,7 @@
 			},
 			{
 				"command": "better-diff-viewer.viewRepoGitDiff",
-				"title": "Better-diff-viewer: View Repo Uncommitted Git Diff"
+				"title": "Better-diff-viewer: View Uncommitted Changes"
 			},
 			{
 				"command": "better-diff-viewer.viewGitDiffForFile",
