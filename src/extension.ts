@@ -207,7 +207,7 @@ function viewDiffDocument(document: vscode.TextDocument) {
 
 function getOrCreateViewPanel() {
 	if (!panel) {
-		panel = vscode.window.createWebviewPanel("diffViewer", "Diff Viewer", { viewColumn: vscode.ViewColumn.Two, preserveFocus: true }, { enableScripts: true });
+		panel = vscode.window.createWebviewPanel("diffViewer", "Diff Viewer", { viewColumn: vscode.ViewColumn.Two, preserveFocus: true }, { enableScripts: true, enableFindWidget: true });
 		panel.onDidDispose(() => {
 			panel = undefined;
 		});

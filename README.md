@@ -26,7 +26,6 @@ For example, view Diff in HTML, revert a file ...
 - [x] Store users view actions (i.e., remember viewed button for files)
 - [x] Zoom in/out
 - [ ] View content of a GIT commit
-- [ ] Find text
 - [ ] Specify panel location (i.e. in editor or panel)
 - [ ] Support hunk action - e.g. revert hunk only code
 - [ ] Triggering extension commands from bottom toolbar
