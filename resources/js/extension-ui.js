@@ -88,6 +88,8 @@ function showDiff2HtmlUi() {
 
 	displayZoomNum(userAction?.zoomNum ? userAction.zoomNum : 0.9);
 
+	displayColorScheme(config["diff2html-ui"].colorScheme);
+
 	diff2htmlUi = new Diff2HtmlUI(jQuery(diff2htmlContainerId)[0], diffContent, config["diff2html-ui"]);
 	diff2htmlUi.draw();
 	if (cmd) {
@@ -104,6 +106,16 @@ function showDiff2HtmlUi() {
 	if (config.preserveViewedFileState) {
 		prepareFileViewed();
 	}
+}
+
+function displayColorScheme(colorScheme) {
+	jQuery("#bdv-body")
+		.removeClass(function (index, className) {
+			return (className.match(/(^|\s)bdv-cs-\S+/g) || []).join(" ");
+		})
+		.addClass(`bdv-cs-${colorScheme}`);
+
+	jQuery("#bdv-highlight-js").prop("media", colorScheme === "dark" ? "screen and (prefers-color-scheme: dark)" : "");
 }
 
 function prepareFileViewed() {

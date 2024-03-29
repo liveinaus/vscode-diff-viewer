@@ -34,6 +34,7 @@ type BetterDiffViewerOptions = {
 };
 
 export function activate(context: vscode.ExtensionContext) {
+	addToolbarBtns(context);
 	extensionPath = context.extensionPath;
 	updateDataForConfig();
 	context.subscriptions.push(
@@ -44,6 +45,37 @@ export function activate(context: vscode.ExtensionContext) {
 	);
 	vscode.workspace.onDidSaveTextDocument(autoRefresh);
 	vscode.workspace.onDidOpenTextDocument(actionWhenFileExtensionDetected);
+}
+
+function getDefaultViewMode(): "dark" | "light" {
+	return vscode.window.activeColorTheme.kind === vscode.ColorThemeKind.Dark ? "dark" : "light";
+}
+
+function getUserDefinedViewMode(): "dark" | "light" {
+	const userConfigColorSchema = userConfig.get("diff2html-ui.colorScheme");
+	if (userConfigColorSchema && (userConfigColorSchema === "dark" || userConfigColorSchema === "light")) {
+		return userConfigColorSchema;
+	} else {
+		return getDefaultViewMode();
+	}
+}
+
+function addToolbarBtns(context: vscode.ExtensionContext) {
+	// Create a status bar item
+	const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
+
+	// Set the text and tooltip for the status bar item
+	statusBarItem.text = "Uncommitted";
+	statusBarItem.tooltip = "View Uncommitted Changes";
+
+	// Assign a command to the status bar item
+	statusBarItem.command = "better-diff-viewer.viewRepoGitDiff";
+
+	// Show the status bar item
+	statusBarItem.show();
+
+	// Register a disposable to dispose the status bar item when the extension is deactivated
+	context.subscriptions.push(statusBarItem);
 }
 
 function actionWhenFileExtensionDetected(document: any) {
@@ -57,7 +89,7 @@ function actionWhenFileExtensionDetected(document: any) {
 
 function updateDataForConfig() {
 	userConfig = vscode.workspace.getConfiguration("better-diff-viewer");
-	const defaultDiff2HtmlUiOptions = { colorScheme: "light", fileListToggle: true, fileListStartVisible: false, fileContentToggle: true, matching: "lines", outputFormat: "line-by-line", synchronisedScroll: true, highlight: true, renderNothingWhenEmpty: false };
+	const defaultDiff2HtmlUiOptions = { fileListToggle: true, fileListStartVisible: false, fileContentToggle: true, matching: "lines", outputFormat: "line-by-line", synchronisedScroll: true, highlight: true, renderNothingWhenEmpty: false };
 	const userDiff2HtmlUiConfigObj = {
 		outputFormat: getStringUserConfig("diff2html-ui.outputFormat"),
 		drawFileList: userConfig.get("diff2html-ui.drawFileList"),
@@ -76,7 +108,7 @@ function updateDataForConfig() {
 		compiledTemplates: userConfig.get("diff2html-ui.compiledTemplates"),
 		rawTemplates: userConfig.get("diff2html-ui.rawTemplates"),
 		highlightLanguages: userConfig.get("diff2html-ui.highlightLanguages"),
-		colorScheme: userConfig.get("diff2html-ui.colorScheme"),
+		colorScheme: getUserDefinedViewMode(),
 		synchronisedScroll: userConfig.get("diff2html-ui.synchronisedScroll"),
 		highlight: userConfig.get("diff2html-ui.highlight"),
 		fileListToggle: userConfig.get("diff2html-ui.fileListToggle"),
@@ -224,7 +256,7 @@ function getOrCreateViewPanel() {
             <title>Diff Viewer</title>
 
             <link rel="stylesheet" type="text/css" href="${getResourcesUri("css", "fontawesome.all.min.css")}"/>
-            <link rel="stylesheet" type="text/css" href="${getResourcesUri("css", "highlight.js-github.min.css")}"/>
+            <link id="bdv-highlight-js" rel="stylesheet" type="text/css" href="${getResourcesUri("css", "highlight.js-github.min.css")}"/>
             <link rel="stylesheet" type="text/css" href="${getResourcesUri("css", "diff2html.min.css")}"/>
             <link rel="stylesheet" type="text/css" href="${getResourcesUri("css", "custom-style.css")}"/>
 
@@ -235,7 +267,7 @@ function getOrCreateViewPanel() {
 
             <style id="custom-css-style"></style>
         </head>
-        <body>
+        <body id="bdv-body">
             <div id="main-container">
               <div id="diff2html-header">
                 <button id="refresh-btn">Refresh</button>

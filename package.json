@@ -24,7 +24,7 @@
 			},
 			{
 				"command": "better-diff-viewer.viewRepoGitDiff",
-				"title": "Better-diff-viewer: View Repo Uncommitted Git Diff"
+				"title": "Better-diff-viewer: View Uncommitted Changes"
 			},
 			{
 				"command": "better-diff-viewer.viewGitDiffForFile",
