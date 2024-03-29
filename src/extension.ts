@@ -306,7 +306,7 @@ function autoRefresh() {
 function refresh(isForced: any) {
 	const oldDataStr = JSON.stringify(data);
 	refreshData();
-	if (isForced || !oldDataStr || oldDataStr != JSON.stringify(data)) {
+	if (isForced || !oldDataStr || oldDataStr !== JSON.stringify(data)) {
 		doAction("showDiffContent", data);
 	} else {
 		//do nothing - there is no change to the data or config

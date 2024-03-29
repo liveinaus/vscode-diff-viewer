@@ -5,7 +5,9 @@ export const UNCOMMITTED = "*";
 const repo: string = getRepoPath();
 
 export function viewDiffInFile(fromHash: string, toHash: string, oldFilePath: string, newFilePath: string): string {
-	if (fromHash === UNCOMMITTED) fromHash = "HEAD";
+	if (fromHash === UNCOMMITTED) {
+		fromHash = "HEAD";
+	}
 
 	fromHash = fromHash === toHash ? fromHash + "^" : fromHash;
 
