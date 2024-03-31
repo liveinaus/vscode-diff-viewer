@@ -28,8 +28,9 @@ export function viewGitDiffForRepo(): string {
 }
 
 export function execShell(cmd: string): string {
+	const preCmd = `cd '${repo}';`;
 	try {
-		return cp.execSync(cmd).toString();
+		return cp.execSync(`${preCmd} ${cmd}`).toString();
 	} catch (e) {
 		throwError(`cannot get output from [[ ${cmd} ]]`);
 	}

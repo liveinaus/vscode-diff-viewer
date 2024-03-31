@@ -27,7 +27,7 @@ For example, view Diff in HTML, revert a file ...
 - [x] Zoom in/out
 - [x] Triggering extension commands from bottom toolbar
 - [x] Specify panel location (i.e. in editor or panel)
-- [ ] View content of a GIT commit
+- [x] View content of a GIT commit
 - [ ] Support hunk action - e.g. revert hunk only code
 - [ ] Show and interact with git log tree
 
@@ -37,6 +37,8 @@ For example, view Diff in HTML, revert a file ...
 - `better-diff-viewer.viewRepoGitDiff`: view Git diff for current repository
 - `better-diff-viewer.viewGitDiffForFile`: view Git diff for current file
 - `better-diff-viewer.viewCustomDiffFromCmd`: View Diff from a custom command on current repository
+- `better-diff-viewer.viewChangesInCommit`: View Changes in selected commit
+- `better-diff-viewer.viewChangesBetweenCommits`: View Changes between selected commits
 
 ## Settings
 

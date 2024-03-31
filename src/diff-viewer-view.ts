@@ -22,7 +22,9 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.commands.registerCommand("better-diff-viewer.viewDiffFile", viewDiffFile),
 		vscode.commands.registerCommand("better-diff-viewer.viewRepoGitDiff", viewRepoGitDiff),
 		vscode.commands.registerCommand("better-diff-viewer.viewGitDiffForFile", viewGitDiffForFile),
-		vscode.commands.registerCommand("better-diff-viewer.viewCustomDiffFromCmd", viewCustomDiffFromCmd)
+		vscode.commands.registerCommand("better-diff-viewer.viewCustomDiffFromCmd", viewCustomDiffFromCmd),
+		vscode.commands.registerCommand("better-diff-viewer.viewChangesInCommit", viewChangesInCommit),
+		vscode.commands.registerCommand("better-diff-viewer.viewChangesBetweenCommits", viewChangesBetweenCommits)
 	);
 	vscode.workspace.onDidSaveTextDocument(autoRefresh);
 	vscode.workspace.onDidOpenTextDocument(actionWhenFileExtensionDetected);
@@ -88,7 +90,6 @@ function viewGitDiffForFile() {
 }
 
 async function viewCustomDiffFromCmd() {
-	const preCmd = `cd ${utils.getRepoPath()};`;
 	const customCmd = await vscode.window.showInputBox({
 		prompt: "Enter your custom diff command",
 		placeHolder: "For example: git diff HEAD <file_name>",
@@ -97,12 +98,54 @@ async function viewCustomDiffFromCmd() {
 
 	if (customCmd) {
 		prepareViewerWebview();
-		updateDataByCmd(`${preCmd} ${customCmd}`);
+		updateDataByCmd(customCmd);
 		doAction("showDiffContent", data);
 		lastUserCustomCmd = customCmd;
 	} else {
 		vscode.window.showWarningMessage("No diff command provided.");
 	}
+}
+
+async function viewChangesInCommit() {
+	const selectedCommit: any = await vscode.window.showQuickPick(getSelectableCommits(), {
+		placeHolder: "Select a commit",
+	});
+
+	const commitHash = getCommitHash(selectedCommit);
+	const customCmd = `git diff ${commitHash}^ ${commitHash}`;
+	prepareViewerWebview();
+	updateDataByCmd(customCmd);
+	doAction("showDiffContent", data);
+}
+
+function getSelectableCommits(): string[] {
+	const cmd = "git --no-pager log --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset'";
+	const output: string = utils.execShell(cmd);
+	const commits: string[] = output.split("\n");
+	if (!commits) {
+		vscode.window.showErrorMessage("No commits found.");
+		return [];
+	}
+	return commits;
+}
+
+function getCommitHash(commit: string) {
+	return commit.substring(0, 7);
+}
+
+async function viewChangesBetweenCommits() {
+	const selectedCommit1: any = await vscode.window.showQuickPick(getSelectableCommits(), {
+		placeHolder: "Select 1st commit",
+	});
+
+	const selectedCommit2: any = await vscode.window.showQuickPick(getSelectableCommits(), {
+		placeHolder: "Select 2nd commit",
+	});
+
+	const customCmd = `git diff ${getCommitHash(selectedCommit1)} ${getCommitHash(selectedCommit2)}`;
+	prepareViewerWebview();
+	updateDataByCmd(customCmd);
+	doAction("showDiffContent", data);
 }
 
 function viewRepoGitDiff() {

@@ -51,6 +51,14 @@
 			{
 				"command": "better-diff-viewer.viewCustomDiffFromCmd",
 				"title": "Better-diff-viewer: View Diff from a custom command"
+			},
+			{
+				"command": "better-diff-viewer.viewChangesInCommit",
+				"title": "Better-diff-viewer: View Changes in a commit"
+			},
+			{
+				"command": "better-diff-viewer.viewChangesBetweenCommits",
+				"title": "Better-diff-viewer: View Changes between commits"
 			}
 		]
 	},
