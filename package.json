@@ -15,8 +15,26 @@
 	"activationEvents": [
 		"onLanguage:diff"
 	],
-	"main": "./dist/extension.js",
+	"main": "./dist/main.js",
 	"contributes": {
+		"viewsContainers": {
+			"panel": [
+				{
+					"id": "bdv-view",
+					"title": "Better Diff View",
+					"icon": "test.icon"
+				}
+			]
+		},
+		"views": {
+			"bdv-view": [
+				{
+					"type": "webview",
+					"id": "better-diff-viewer.bdvView",
+					"name": "Diff View"
+				}
+			]
+		},
 		"commands": [
 			{
 				"command": "better-diff-viewer.viewDiffFile",

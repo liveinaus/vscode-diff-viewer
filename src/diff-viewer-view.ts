@@ -1,42 +1,22 @@
 import * as path from "path";
 import * as vscode from "vscode";
 import * as utils from "./utils";
+import * as Types from "./types";
+import * as config from "./config";
 
 let extensionPath: string;
-let panel: vscode.WebviewPanel | undefined;
-let data: DiffViewerData = {};
+let webviewPanel: vscode.WebviewPanel | undefined;
+let webviewView: vscode.WebviewView | undefined;
+let data: Types.DiffViewerData = {};
 let lastUserCustomCmd: string;
-
-type DiffViewerData = {
-	cmd?: string;
-	diffContent?: string;
-	config?: BetterDiffViewerOptions;
-	userAction?: UserAction;
-};
-let userConfig: vscode.WorkspaceConfiguration;
-
-type UserAction = {
-	viewedFiles?: string[];
-	zoomNum?: number;
-	showCmd?: boolean;
-};
-
-type BetterDiffViewerOptions = {
-	isAutoRefresh?: boolean;
-	showBtnIcon?: boolean;
-	showBtnLongDesc?: boolean;
-	showBtnShortDesc?: boolean;
-	customCssStyle?: string;
-	preserveViewedFileState?: boolean;
-	showCmd?: boolean;
-	zoomNum?: number;
-	"diff2html-ui": {};
-};
 
 export function activate(context: vscode.ExtensionContext) {
 	addToolbarBtns(context);
 	extensionPath = context.extensionPath;
 	updateDataForConfig();
+
+	const provider = new DiffViewerProvider(context.extensionUri);
+
 	context.subscriptions.push(
 		vscode.commands.registerCommand("better-diff-viewer.viewDiffFile", viewDiffFile),
 		vscode.commands.registerCommand("better-diff-viewer.viewRepoGitDiff", viewRepoGitDiff),
@@ -45,19 +25,14 @@ export function activate(context: vscode.ExtensionContext) {
 	);
 	vscode.workspace.onDidSaveTextDocument(autoRefresh);
 	vscode.workspace.onDidOpenTextDocument(actionWhenFileExtensionDetected);
+
+	context.subscriptions.push(vscode.window.registerWebviewViewProvider(DiffViewerProvider.viewType, provider));
 }
 
-function getDefaultViewMode(): "dark" | "light" {
-	return vscode.window.activeColorTheme.kind === vscode.ColorThemeKind.Dark ? "dark" : "light";
-}
-
-function getUserDefinedViewMode(): "dark" | "light" {
-	const userConfigColorSchema = userConfig.get("diff2html-ui.colorScheme");
-	if (userConfigColorSchema && (userConfigColorSchema === "dark" || userConfigColorSchema === "light")) {
-		return userConfigColorSchema;
-	} else {
-		return getDefaultViewMode();
-	}
+export function deactivate() {
+	webviewPanel = undefined;
+	webviewView = undefined;
+	data = {};
 }
 
 function addToolbarBtns(context: vscode.ExtensionContext) {
@@ -87,92 +62,6 @@ function actionWhenFileExtensionDetected(document: any) {
 	}
 }
 
-function updateDataForConfig() {
-	userConfig = vscode.workspace.getConfiguration("better-diff-viewer");
-	const defaultDiff2HtmlUiOptions = { fileListToggle: true, fileListStartVisible: false, fileContentToggle: true, matching: "lines", outputFormat: "line-by-line", synchronisedScroll: true, highlight: true, renderNothingWhenEmpty: false };
-	const userDiff2HtmlUiConfigObj = {
-		outputFormat: getStringUserConfig("diff2html-ui.outputFormat"),
-		drawFileList: userConfig.get("diff2html-ui.drawFileList"),
-		srcPrefix: getStringUserConfig("diff2html-ui.srcPrefix"),
-		dstPrefix: getStringUserConfig("diff2html-ui.dstPrefix"),
-		diffMaxChanges: userConfig.get("diff2html-ui.diffMaxChanges"),
-		diffMaxLineLength: userConfig.get("diff2html-ui.diffMaxLineLength"),
-		diffTooBigMessage: getStringUserConfig("diff2html-ui.diffTooBigMessage"),
-		matching: getStringUserConfig("diff2html-ui.matching"),
-		matchWordsThreshold: userConfig.get("diff2html-ui.matchWordsThreshold"),
-		maxLineLengthHighlight: userConfig.get("diff2html-ui.maxLineLengthHighlight"),
-		diffStyle: userConfig.get("diff2html-ui.diffStyle"),
-		renderNothingWhenEmpty: userConfig.get("diff2html-ui.renderNothingWhenEmpty"),
-		matchingMaxComparisons: userConfig.get("diff2html-ui.matchingMaxComparisons"),
-		maxLineSizeInBlockForComparison: userConfig.get("diff2html-ui.maxLineSizeInBlockForComparison"),
-		compiledTemplates: userConfig.get("diff2html-ui.compiledTemplates"),
-		rawTemplates: userConfig.get("diff2html-ui.rawTemplates"),
-		highlightLanguages: userConfig.get("diff2html-ui.highlightLanguages"),
-		colorScheme: getUserDefinedViewMode(),
-		synchronisedScroll: userConfig.get("diff2html-ui.synchronisedScroll"),
-		highlight: userConfig.get("diff2html-ui.highlight"),
-		fileListToggle: userConfig.get("diff2html-ui.fileListToggle"),
-		fileListStartVisible: userConfig.get("diff2html-ui.fileListStartVisible"),
-		fileContentToggle: userConfig.get("diff2html-ui.fileContentToggle"),
-		stickyFileHeaders: userConfig.get("diff2html-ui.stickyFileHeaders"),
-	};
-
-	const defaultConfigObj: BetterDiffViewerOptions = {
-		"diff2html-ui": mergeConfig(defaultDiff2HtmlUiOptions, userDiff2HtmlUiConfigObj),
-		isAutoRefresh: true,
-		showBtnIcon: true,
-		showBtnLongDesc: true,
-		showBtnShortDesc: false,
-		customCssStyle: "",
-		preserveViewedFileState: true,
-		showCmd: true,
-		zoomNum: 0.9,
-	};
-
-	const userConfigObj = {
-		isAutoRefresh: getBooleanUserConfig("isAutoRefresh"),
-		showBtnIcon: getBooleanUserConfig("showBtnIcon"),
-		showBtnLongDesc: getBooleanUserConfig("showBtnLongDesc"),
-		showBtnShortDesc: getBooleanUserConfig("showBtnShortDesc"),
-		customCssStyle: getStringUserConfig("customCssStyle"),
-		preserveViewedFileState: getBooleanUserConfig("preserveViewedFileState"),
-		showCmd: getBooleanUserConfig("showCmd"),
-		zoomNum: getNumberUserConfig("zoomNum"),
-	};
-
-	data.config = mergeConfig(defaultConfigObj, userConfigObj);
-}
-
-function getBooleanUserConfig(key: string): boolean | undefined {
-	if (typeof userConfig.get(key) === "undefined") {
-		return undefined;
-	} else {
-		return userConfig.get(key) === "true" || userConfig.get(key) === true;
-	}
-}
-
-function getNumberUserConfig(key: string): number | undefined {
-	if (typeof userConfig.get(key) === "undefined") {
-		return undefined;
-	} else {
-		return Number(userConfig.get(key));
-	}
-}
-
-function getStringUserConfig(key: string): string | undefined {
-	if (typeof userConfig.get(key) === "undefined") {
-		return undefined;
-	} else {
-		return String(userConfig.get(key));
-	}
-}
-
-// This method is called when your extension is deactivated
-export function deactivate() {
-	panel = undefined;
-	data = {};
-}
-
 function updateDataByDiffContent(diffContent: string) {
 	data.cmd = undefined;
 	data.diffContent = diffContent;
@@ -186,7 +75,7 @@ function updateDataByCmd(cmd: string) {
 }
 
 function viewGitDiffForFile() {
-	getOrCreateViewPanel();
+	prepareViewerWebview();
 	const editor = vscode.window.activeTextEditor;
 	const filePath = editor?.document.uri.fsPath;
 	if (filePath) {
@@ -206,7 +95,7 @@ async function viewCustomDiffFromCmd() {
 	});
 
 	if (customCmd) {
-		getOrCreateViewPanel();
+		prepareViewerWebview();
 		updateDataByCmd(`${preCmd} ${customCmd}`);
 		doAction("showDiffContent", data);
 		lastUserCustomCmd = customCmd;
@@ -216,7 +105,7 @@ async function viewCustomDiffFromCmd() {
 }
 
 function viewRepoGitDiff() {
-	getOrCreateViewPanel();
+	prepareViewerWebview();
 	updateDataByCmd(utils.viewGitDiffForRepo());
 	doAction("showDiffContent", data);
 }
@@ -232,21 +121,35 @@ function viewDiffFile() {
 }
 
 function viewDiffDocument(document: vscode.TextDocument) {
-	getOrCreateViewPanel();
+	prepareViewerWebview();
 	updateDataByDiffContent(document.getText());
 	doAction("showDiffContent", data);
 }
 
-function getOrCreateViewPanel() {
-	if (!panel) {
-		panel = vscode.window.createWebviewPanel("diffViewer", "Diff Viewer", { viewColumn: vscode.ViewColumn.Beside, preserveFocus: true }, { enableScripts: true, enableFindWidget: true });
-		panel.onDidDispose(() => {
-			panel = undefined;
+function prepareViewerWebview() {
+	if (!webviewPanel) {
+		webviewPanel = vscode.window.createWebviewPanel("diffViewer", "Diff Viewer", { viewColumn: vscode.ViewColumn.Beside, preserveFocus: true }, { enableScripts: true, enableFindWidget: true });
+		webviewPanel.onDidDispose(() => {
+			webviewPanel = undefined;
 		});
-		// Subscribe to messages from the webview
-		panel.webview.onDidReceiveMessage(handleMessageFromWebview);
+		prepareWebviewInner(webviewPanel.webview);
+	} else {
+		webviewPanel.reveal(vscode.ViewColumn.Beside, true);
+	}
 
-		const htmlContent = `
+	if (webviewView?.webview && !webviewView?.webview.html) {
+		prepareWebviewInner(webviewView?.webview);
+	}
+}
+
+function prepareWebviewInner(webview: vscode.Webview) {
+	webview.onDidReceiveMessage(handleMessageFromWebview);
+	if (!webview?.options?.enableScripts) {
+		webview.options = {
+			enableScripts: true,
+		};
+	}
+	const htmlContent = `
         <!DOCTYPE html>
         <html>
         <head>
@@ -255,15 +158,15 @@ function getOrCreateViewPanel() {
             <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
             <title>Diff Viewer</title>
 
-            <link rel="stylesheet" type="text/css" href="${getResourcesUri("css", "fontawesome.all.min.css")}"/>
-            <link id="bdv-highlight-js" rel="stylesheet" type="text/css" href="${getResourcesUri("css", "highlight.js-github.min.css")}"/>
-            <link rel="stylesheet" type="text/css" href="${getResourcesUri("css", "diff2html.min.css")}"/>
-            <link rel="stylesheet" type="text/css" href="${getResourcesUri("css", "custom-style.css")}"/>
+            <link rel="stylesheet" type="text/css" href="${getResourcesUri(webview, "css", "fontawesome.all.min.css")}"/>
+            <link id="bdv-highlight-js" rel="stylesheet" type="text/css" href="${getResourcesUri(webview, "css", "highlight.js-github.min.css")}"/>
+            <link rel="stylesheet" type="text/css" href="${getResourcesUri(webview, "css", "diff2html.min.css")}"/>
+            <link rel="stylesheet" type="text/css" href="${getResourcesUri(webview, "css", "custom-style.css")}"/>
 
-            <script type="text/javascript" src="${getResourcesUri("js", "fontawesome.all.min.js")}"></script>
-            <script type="text/javascript" src="${getResourcesUri("js", "jquery.min.js")}"></script>
-            <script type="text/javascript" src="${getResourcesUri("js", "diff2html-ui.min.js")}"></script>
-            <script type="text/javascript" src="${getResourcesUri("js", "extension-ui.js")}"></script>
+            <script type="text/javascript" src="${getResourcesUri(webview, "js", "fontawesome.all.min.js")}"></script>
+            <script type="text/javascript" src="${getResourcesUri(webview, "js", "jquery.min.js")}"></script>
+            <script type="text/javascript" src="${getResourcesUri(webview, "js", "diff2html-ui.min.js")}"></script>
+            <script type="text/javascript" src="${getResourcesUri(webview, "js", "diff-viewer-ui.js")}"></script>
 
             <style id="custom-css-style"></style>
         </head>
@@ -283,24 +186,13 @@ function getOrCreateViewPanel() {
         </body>
         </html>
     `;
-		//update htmlContent by settings
-		panel.webview.html = htmlContent;
-	}
-
-	panel.reveal(vscode.ViewColumn.Beside, true);
-	return panel;
-}
-
-function mergeConfig(inDefaultConfig: any, inUserConfig: any) {
-	const mergedObject = {
-		...inDefaultConfig,
-		...Object.fromEntries(Object.entries(inUserConfig).map(([key, value]) => [key, value ?? inDefaultConfig[key]])),
-	};
-	return mergedObject;
+	//update htmlContent by settings
+	webview.html = htmlContent;
 }
 
 function doAction(action: string, actionData: any) {
-	panel?.webview.postMessage({ command: action, data: actionData });
+	webviewPanel?.webview.postMessage({ command: action, data: actionData });
+	webviewView?.webview.postMessage({ command: action, data: actionData });
 }
 
 function handleMessageFromWebview(message: any) {
@@ -310,8 +202,7 @@ function handleMessageFromWebview(message: any) {
 	} else if (message.command === "openFile") {
 		openFile(message.relativeFilePath);
 	} else if (message.command === "revertFile") {
-		const showRevertFileWarning: boolean = userConfig.get("showRevertFileWarning") ? Boolean(userConfig.get("showRevertFileWarning")) : true;
-		revertFile(message.relativeFilePath, showRevertFileWarning);
+		revertFile(message.relativeFilePath, data.config?.showRevertFileWarning);
 	} else if (message.command === "copyFilePath") {
 		copyFilePath(message.relativeFilePath);
 	} else if (message.command === "toggleViewedFile") {
@@ -345,9 +236,9 @@ function refresh(isForced: any) {
 	}
 }
 
-function getResourcesUri(...pathComps: string[]): vscode.Uri {
-	if (panel) {
-		return panel.webview.asWebviewUri(getUri("resources", ...pathComps));
+function getResourcesUri(webview: vscode.Webview, ...pathComps: string[]): vscode.Uri {
+	if (webview) {
+		return webview.asWebviewUri(getUri("resources", ...pathComps));
 	} else {
 		utils.throwError("Cannot get panel when getting resources URI" + pathComps);
 	}
@@ -411,7 +302,7 @@ function openFile(relativePath: string) {
 	});
 }
 
-function revertFile(relativePath: string, withWarning: boolean) {
+function revertFile(relativePath: string, withWarning: boolean | undefined) {
 	const filePath = utils.getAbsolutePath(relativePath);
 	const revertFileAction = () => {
 		const cmd = "cd " + utils.getRepoPath() + "; git restore " + filePath;
@@ -427,4 +318,18 @@ function revertFile(relativePath: string, withWarning: boolean) {
 	} else {
 		revertFileAction();
 	}
+}
+
+class DiffViewerProvider implements vscode.WebviewViewProvider {
+	public static readonly viewType = "better-diff-viewer.bdvView";
+
+	constructor(private readonly _extensionUri: vscode.Uri) {}
+
+	public resolveWebviewView(inWebviewView: vscode.WebviewView, context: vscode.WebviewViewResolveContext, _token: vscode.CancellationToken) {
+		webviewView = inWebviewView;
+	}
+}
+
+function updateDataForConfig() {
+	data.config = config.getAppConfig();
 }
