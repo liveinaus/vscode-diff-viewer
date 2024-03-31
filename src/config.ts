@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import * as Types from "./types";
+import * as diffViewerView from "./diff-viewer-view";
 let userConfig: vscode.WorkspaceConfiguration;
 
 export function getAppConfig(): Types.BetterDiffViewerOptions {
@@ -43,6 +44,8 @@ export function getAppConfig(): Types.BetterDiffViewerOptions {
 		showCmd: true,
 		zoomNum: 0.9,
 		showRevertFileWarning: true,
+		componentsDisplayAtEditor: [diffViewerView.componentCode],
+		componentsDisplayAtPanel: [],
 	};
 
 	const userConfigObj = {
@@ -55,9 +58,19 @@ export function getAppConfig(): Types.BetterDiffViewerOptions {
 		showCmd: getBooleanUserConfig("showCmd"),
 		zoomNum: getNumberUserConfig("zoomNum"),
 		showRevertFileWarning: getBooleanUserConfig("showRevertFileWarning"),
+		componentsDisplayAtEditor: getArrayUserConfig("componentsDisplayAtEditor"),
+		componentsDisplayAtPanel: getArrayUserConfig("componentsDisplayAtPanel"),
 	};
 
 	return mergeConfig(defaultConfigObj, userConfigObj);
+}
+
+function getArrayUserConfig(key: string): string[] | undefined {
+	if (typeof userConfig.get(key) === "undefined") {
+		return undefined;
+	} else {
+		return userConfig.get(key);
+	}
 }
 
 function getBooleanUserConfig(key: string): boolean | undefined {

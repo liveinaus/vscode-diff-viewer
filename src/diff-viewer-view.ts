@@ -9,6 +9,7 @@ let webviewPanel: vscode.WebviewPanel | undefined;
 let webviewView: vscode.WebviewView | undefined;
 let data: Types.DiffViewerData = {};
 let lastUserCustomCmd: string;
+export const componentCode: string = "diffViewer";
 
 export function activate(context: vscode.ExtensionContext) {
 	addToolbarBtns(context);
@@ -127,29 +128,41 @@ function viewDiffDocument(document: vscode.TextDocument) {
 }
 
 function prepareViewerWebview() {
-	if (!webviewPanel) {
-		webviewPanel = vscode.window.createWebviewPanel("diffViewer", "Diff Viewer", { viewColumn: vscode.ViewColumn.Beside, preserveFocus: true }, { enableScripts: true, enableFindWidget: true });
-		webviewPanel.onDidDispose(() => {
-			webviewPanel = undefined;
-		});
-		prepareWebviewInner(webviewPanel.webview);
+	if (config.getAppConfig().componentsDisplayAtEditor?.includes(componentCode)) {
+		if (!webviewPanel) {
+			webviewPanel = vscode.window.createWebviewPanel("diffViewer", "Diff Viewer", { viewColumn: vscode.ViewColumn.Beside, preserveFocus: true }, { enableScripts: true, enableFindWidget: true });
+			webviewPanel.onDidDispose(() => {
+				webviewPanel = undefined;
+			});
+			prepareWebviewInner(webviewPanel.webview);
+		} else {
+			webviewPanel.reveal(vscode.ViewColumn.Beside, true);
+		}
 	} else {
-		webviewPanel.reveal(vscode.ViewColumn.Beside, true);
+		webviewPanel = undefined;
 	}
 
-	if (webviewView?.webview && !webviewView?.webview.html) {
-		prepareWebviewInner(webviewView?.webview);
+	if (config.getAppConfig().componentsDisplayAtPanel?.includes(componentCode)) {
+		if (webviewView?.webview && !webviewView?.webview.html) {
+			prepareWebviewInner(webviewView?.webview);
+		}
+	} else {
+		if (webviewView?.webview && !webviewView?.webview.html) {
+			prepareWebviewInner(webviewView?.webview, '<br/>You need to adjust setting to enable it. For example: <br/><br/><br/><b>"better-diff-viewer.componentsDisplayAtPanel": ["diffViewer"]<b/>');
+		}
 	}
 }
 
-function prepareWebviewInner(webview: vscode.Webview) {
+function prepareWebviewInner(webview: vscode.Webview, overwriteHtml?: string) {
 	webview.onDidReceiveMessage(handleMessageFromWebview);
 	if (!webview?.options?.enableScripts) {
 		webview.options = {
 			enableScripts: true,
 		};
 	}
-	const htmlContent = `
+	const htmlContent = overwriteHtml
+		? overwriteHtml
+		: `
         <!DOCTYPE html>
         <html>
         <head>

@@ -21,5 +21,7 @@ export type BetterDiffViewerOptions = {
 	showCmd?: boolean;
 	zoomNum?: number;
 	showRevertFileWarning?: boolean;
+	componentsDisplayAtEditor?: string[];
+	componentsDisplayAtPanel?: string[];
 	"diff2html-ui": {};
 };
