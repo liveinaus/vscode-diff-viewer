@@ -25,3 +25,5 @@ export type BetterDiffViewerOptions = {
 	componentsDisplayAtPanel?: string[];
 	"diff2html-ui": {};
 };
+
+export type FileChangeState = "ADDED" | "MOVED" | "CHANGED" | "DELETED" | "UNKNOWN";

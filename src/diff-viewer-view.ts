@@ -3,6 +3,8 @@ import * as vscode from "vscode";
 import * as utils from "./utils";
 import * as Types from "./types";
 import * as config from "./config";
+import { v4 as uuidv4 } from "uuid";
+import FileDiff from "./file-diff";
 
 let extensionPath: string;
 let webviewPanel: vscode.WebviewPanel | undefined;
@@ -112,7 +114,7 @@ async function viewChangesInCommit() {
 	});
 
 	const commitHash = getCommitHash(selectedCommit);
-	const customCmd = `git diff ${commitHash}^ ${commitHash}`;
+	const customCmd = `git diff ${commitHash}~ ${commitHash}`;
 	prepareViewerWebview();
 	updateDataByCmd(customCmd);
 	doAction("showDiffContent", data);
@@ -258,7 +260,7 @@ function handleMessageFromWebview(message: any) {
 	} else if (message.command === "openFile") {
 		openFile(message.relativeFilePath);
 	} else if (message.command === "revertFile") {
-		revertFile(message.relativeFilePath, data.config?.showRevertFileWarning);
+		revertFile(message.relativeFilePath, message.fileChangeState as Types.FileChangeState, data.config?.showRevertFileWarning);
 	} else if (message.command === "copyFilePath") {
 		copyFilePath(message.relativeFilePath);
 	} else if (message.command === "toggleViewedFile") {
@@ -358,15 +360,33 @@ function openFile(relativePath: string) {
 	});
 }
 
-function revertFile(relativePath: string, withWarning: boolean | undefined) {
-	const filePath = utils.getAbsolutePath(relativePath);
+function revertFile(relativePath: string, fileChangeState: Types.FileChangeState, withWarning: boolean | undefined) {
+	let targetFilePathA: string;
+	let targetFilePathB: string;
+
+	let cmd = "";
+	if (fileChangeState == "CHANGED" || fileChangeState == "ADDED" || fileChangeState == "DELETED") {
+		targetFilePathA = relativePath;
+		targetFilePathB = relativePath;
+	} else if (fileChangeState == "MOVED") {
+		targetFilePathA = getFilepathsForMovedAction(relativePath)[0];
+		targetFilePathB = getFilepathsForMovedAction(relativePath)[1];
+	} else {
+		vscode.window.showErrorMessage(`Cannot revert a file for [${fileChangeState}]`);
+		return;
+	}
+
+	const fileDiff = new FileDiff(data.diffContent, targetFilePathA, targetFilePathB);
+	const tmpDiffFilePath = utils.createTempFile(`${uuidv4()}.diff`, fileDiff.getRawFileDiff());
+	cmd = `git apply -R -- ${tmpDiffFilePath}`;
+
 	const revertFileAction = () => {
-		const cmd = "cd " + utils.getRepoPath() + "; git restore " + filePath;
 		utils.execShell(cmd);
 		refresh(true);
 	};
+
 	if (withWarning) {
-		vscode.window.showInformationMessage("Do you want to revert selected file?" + relativePath, "Yes", "No").then((answer) => {
+		vscode.window.showInformationMessage(`Do you want to revert selected file?\nPath:${relativePath}\n\n\nCmd:${cmd}`, "Yes", "No").then((answer) => {
 			if (answer === "Yes") {
 				revertFileAction();
 			}
@@ -374,6 +394,15 @@ function revertFile(relativePath: string, withWarning: boolean | undefined) {
 	} else {
 		revertFileAction();
 	}
+}
+
+function getFilepathsForMovedAction(str: string): string[] {
+	const match = str.match(/^(?:([^{}]*)\{)?([^{}]*) → ([^{}]*)\}?$/);
+	if (!match) {
+		throw new Error('Invalid format: Expected "filename1 → filename2 or sharePath/{filename1 → filename2}"');
+	}
+	const sharedPath = match[1] ? match[1].trim() : "";
+	return [`${sharedPath}${match[2].trim()}`, `${sharedPath}${match[3].trim()}`];
 }
 
 class DiffViewerProvider implements vscode.WebviewViewProvider {

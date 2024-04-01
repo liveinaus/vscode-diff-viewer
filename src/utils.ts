@@ -1,7 +1,11 @@
 import * as cp from "child_process";
 import * as vscode from "vscode";
 export const UNCOMMITTED = "*";
+export let extensionPath: string;
+import * as fs from "fs";
+import * as path from "path";
 
+const tempFolderName = "temp";
 const repo: string = getRepoPath();
 
 export function viewDiffInFile(fromHash: string, toHash: string, oldFilePath: string, newFilePath: string): string {
@@ -52,5 +56,30 @@ export function throwError(message: string): never {
 }
 
 export function getAbsolutePath(relativePath: string) {
-	return getRepoPath() + "/" + relativePath;
+	return path.join(getRepoPath(), relativePath);
+}
+
+export function createTempFile(filename: string, fileContent: string) {
+	const tempPath = path.join(extensionPath, tempFolderName);
+	if (!fs.existsSync(tempPath)) {
+		fs.mkdirSync(tempPath, { recursive: true });
+	}
+	const filePath = path.join(tempPath, filename);
+	fs.writeFileSync(filePath, fileContent);
+	return filePath;
+}
+
+export function clearTempFolder() {
+	const tempPath = path.join(extensionPath, tempFolderName);
+	if (fs.existsSync(tempPath)) {
+		fs.readdirSync;
+		for (const file of fs.readdirSync(tempPath)) {
+			fs.unlinkSync(path.join(tempPath, file));
+		}
+	}
+}
+
+export function initUtils(context: vscode.ExtensionContext) {
+	extensionPath = context.extensionPath;
+	clearTempFolder();
 }
