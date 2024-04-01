@@ -2,7 +2,13 @@
 
 View Git diff in a colorful HTML page via [Diff2Html-UI](https://github.com/rtfpessoa/diff2html).
 
-![Better Diff Viewer screenshot](images/screenshot-0.0.1.png)
+### Dark Mode (v0.0.8)
+
+![Better Diff Viewer screenshot - dark](images/screenshot-0.0.8.png)
+
+### Light Mode (v0.0.1)
+
+![Better Diff Viewer screenshot - light](images/screenshot-0.0.1.png)
 
 ## Rationale
 
@@ -28,7 +34,7 @@ For example, view Diff in HTML, revert a file ...
 - [x] Triggering extension commands from bottom toolbar
 - [x] Specify panel location (i.e. in editor or panel)
 - [x] View content of a GIT commit
-- [ ] Support hunk action - e.g. revert hunk only code
+- [x] Support hunk action - e.g. revert hunk only code
 - [ ] Show and interact with git log tree
 
 ## Commands
@@ -44,43 +50,44 @@ For example, view Diff in HTML, revert a file ...
 
 | Command                                                         | Default Value  | Description                                                                                                                  |
 | --------------------------------------------------------------- | -------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| better-diff-viewer.isAutoRefresh                                | true           | toggle if the view needs to be refreshed when any file get saved                                                             |
-| better-diff-viewer.showBtnIcon                                  | true           | show button icon                                                                                                             |
-| better-diff-viewer.showBtnLongDesc                              | true           | show button long description                                                                                                 |
-| better-diff-viewer.showBtnShortDesc                             | false          | show button short description (for saving spaces)                                                                            |
+| better-diff-viewer.isAutoRefresh                                | true           | Toggle if the view needs to be refreshed when any file get saved                                                             |
+| better-diff-viewer.showBtnIcon                                  | true           | Show button icon                                                                                                             |
+| better-diff-viewer.showBtnLongDesc                              | true           | Show button long description                                                                                                 |
+| better-diff-viewer.showBtnShortDesc                             | false          | Show button short description (for saving spaces)                                                                            |
 | better-diff-viewer.customCssStyle                               | ''             | Add custom CSS style for the diff viewer. Please add in one line. For example: ".d2h-file-name{color:cyan !important;}"      |
 | better-diff-viewer.preserveViewedFileState                      | true           | Preserve viewed checkbox state after diff viewer refresh                                                                     |
+| better-diff-viewer.enableRevertHunk                             | true           | Support revert selected hunk                                                                                                 |
 | better-diff-viewer.showCmd                                      | true           | Set the default visibility of the command which used to generate the diff output. The cmd is shown at the bottom of the page |
 | better-diff-viewer.zoomNum                                      | 0.9            | Set default zoom level for the viewer                                                                                        |
 | better-diff-viewer.showRevertFileWarning                        | true           | Display a warning when reverting a file                                                                                      |
 | better-diff-viewer.componentsDisplayAtEditor                    | ["diffViewer"] | Components display at editor section - reload required                                                                       |
 | better-diff-viewer.componentsDisplayAtPanel                     | []             | Components display at panel section - reload required                                                                        |
 |                                                                 |                |                                                                                                                              |
-| better-diff-viewer.diff2html-ui.outputFormat                    | 'line-by-line' | 'line-by-line' or 'side-by-side'; a Diff2Html option                                                                         |
-| better-diff-viewer.diff2html-ui.drawFileList                    | true           | a Diff2Html option                                                                                                           |
-| better-diff-viewer.diff2html-ui.srcPrefix                       | ''             | a Diff2Html option                                                                                                           |
-| better-diff-viewer.diff2html-ui.dstPrefix                       | ''             | a Diff2Html option                                                                                                           |
-| better-diff-viewer.diff2html-ui.diffMaxChanges                  | undefined      | a Diff2Html option                                                                                                           |
-| better-diff-viewer.diff2html-ui.diffMaxLineLength               | undefined      | a Diff2Html option                                                                                                           |
-| better-diff-viewer.diff2html-ui.diffTooBigMessage               | N/A            | a Diff2Html option                                                                                                           |
-| better-diff-viewer.diff2html-ui.matching                        | 'lines'        | 'lines', 'words' or 'none'; a Diff2Html option                                                                               |
-| better-diff-viewer.diff2html-ui.matchWordsThreshold             | 0.25           | a Diff2Html option                                                                                                           |
-| better-diff-viewer.diff2html-ui.maxLineLengthHighlight          | 10000          | a Diff2Html option                                                                                                           |
-| better-diff-viewer.diff2html-ui.diffStyle                       | 'word'         | a Diff2Html option                                                                                                           |
-| better-diff-viewer.diff2html-ui.renderNothingWhenEmpty          | false          | a Diff2Html option                                                                                                           |
-| better-diff-viewer.diff2html-ui.matchingMaxComparisons          | 2500           | a Diff2Html option                                                                                                           |
-| better-diff-viewer.diff2html-ui.maxLineSizeInBlockForComparison | 200            | a Diff2Html option                                                                                                           |
-| better-diff-viewer.diff2html-ui.compiledTemplates               | {}             | a Diff2Html option                                                                                                           |
-| better-diff-viewer.diff2html-ui.rawTemplates                    | {}             | a Diff2Html option                                                                                                           |
-| better-diff-viewer.diff2html-ui.highlightLanguages              | N/A            | a Diff2Html option                                                                                                           |
+| better-diff-viewer.diff2html-ui.outputFormat                    | 'line-by-line' | 'line-by-line' or 'side-by-side'; A Diff2Html option                                                                         |
+| better-diff-viewer.diff2html-ui.drawFileList                    | true           | A Diff2Html option                                                                                                           |
+| better-diff-viewer.diff2html-ui.srcPrefix                       | ''             | A Diff2Html option                                                                                                           |
+| better-diff-viewer.diff2html-ui.dstPrefix                       | ''             | A Diff2Html option                                                                                                           |
+| better-diff-viewer.diff2html-ui.diffMaxChanges                  | undefined      | A Diff2Html option                                                                                                           |
+| better-diff-viewer.diff2html-ui.diffMaxLineLength               | undefined      | A Diff2Html option                                                                                                           |
+| better-diff-viewer.diff2html-ui.diffTooBigMessage               | N/A            | A Diff2Html option                                                                                                           |
+| better-diff-viewer.diff2html-ui.matching                        | 'lines'        | 'lines', 'words' or 'none'; A Diff2Html option                                                                               |
+| better-diff-viewer.diff2html-ui.matchWordsThreshold             | 0.25           | A Diff2Html option                                                                                                           |
+| better-diff-viewer.diff2html-ui.maxLineLengthHighlight          | 10000          | A Diff2Html option                                                                                                           |
+| better-diff-viewer.diff2html-ui.diffStyle                       | 'word'         | A Diff2Html option                                                                                                           |
+| better-diff-viewer.diff2html-ui.renderNothingWhenEmpty          | false          | A Diff2Html option                                                                                                           |
+| better-diff-viewer.diff2html-ui.matchingMaxComparisons          | 2500           | A Diff2Html option                                                                                                           |
+| better-diff-viewer.diff2html-ui.maxLineSizeInBlockForComparison | 200            | A Diff2Html option                                                                                                           |
+| better-diff-viewer.diff2html-ui.compiledTemplates               | {}             | A Diff2Html option                                                                                                           |
+| better-diff-viewer.diff2html-ui.rawTemplates                    | {}             | A Diff2Html option                                                                                                           |
+| better-diff-viewer.diff2html-ui.highlightLanguages              | N/A            | A Diff2Html option                                                                                                           |
 |                                                                 |                |                                                                                                                              |
-| better-diff-viewer.diff2html-ui.colorScheme                     | 'auto'         | 'light', 'dark' or 'auto'; a Diff2Html option values. The 'auto' will use the VSCode color schema                            |
-| better-diff-viewer.diff2html-ui.synchronisedScroll              | true           | a Diff2HtmlUI option                                                                                                         |
-| better-diff-viewer.diff2html-ui.highlight                       | true           | a Diff2HtmlUI option                                                                                                         |
-| better-diff-viewer.diff2html-ui.fileListToggle                  | true           | a Diff2HtmlUI option                                                                                                         |
-| better-diff-viewer.diff2html-ui.fileListStartVisible            | false          | a Diff2HtmlUI option                                                                                                         |
-| better-diff-viewer.diff2html-ui.fileContentToggle               | true           | a Diff2HtmlUI option                                                                                                         |
-| better-diff-viewer.diff2html-ui.stickyFileHeaders               | true           | a Diff2HtmlUI option                                                                                                         |
+| better-diff-viewer.diff2html-ui.colorScheme                     | 'auto'         | 'light', 'dark' or 'auto'; A Diff2Html option values. The 'auto' will use the VSCode color schema                            |
+| better-diff-viewer.diff2html-ui.synchronisedScroll              | true           | A Diff2HtmlUI option                                                                                                         |
+| better-diff-viewer.diff2html-ui.highlight                       | true           | A Diff2HtmlUI option                                                                                                         |
+| better-diff-viewer.diff2html-ui.fileListToggle                  | true           | A Diff2HtmlUI option                                                                                                         |
+| better-diff-viewer.diff2html-ui.fileListStartVisible            | false          | A Diff2HtmlUI option                                                                                                         |
+| better-diff-viewer.diff2html-ui.fileContentToggle               | true           | A Diff2HtmlUI option                                                                                                         |
+| better-diff-viewer.diff2html-ui.stickyFileHeaders               | true           | A Diff2HtmlUI option                                                                                                         |
 
 ## Installation
 

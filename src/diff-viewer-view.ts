@@ -191,10 +191,8 @@ function prepareViewerWebview() {
 		if (webviewView?.webview && !webviewView?.webview.html) {
 			prepareWebviewInner(webviewView?.webview);
 		}
-	} else {
-		if (webviewView?.webview && !webviewView?.webview.html) {
-			prepareWebviewInner(webviewView?.webview, '<br/>You need to adjust setting to enable it. For example: <br/><br/><br/><b>"better-diff-viewer.componentsDisplayAtPanel": ["diffViewer"]<b/>');
-		}
+	} else if (webviewView?.webview && !webviewView?.webview.html) {
+		prepareWebviewInner(webviewView?.webview, '<br/>You need to adjust setting to enable it. For example: <br/><br/><br/><b>"better-diff-viewer.componentsDisplayAtPanel": ["diffViewer"]<b/>');
 	}
 }
 
@@ -205,9 +203,9 @@ function prepareWebviewInner(webview: vscode.Webview, overwriteHtml?: string) {
 			enableScripts: true,
 		};
 	}
-	const htmlContent = overwriteHtml
-		? overwriteHtml
-		: `
+	const htmlContent =
+		overwriteHtml ??
+		`
         <!DOCTYPE html>
         <html>
         <head>
@@ -261,6 +259,8 @@ function handleMessageFromWebview(message: any) {
 		openFile(message.relativeFilePath);
 	} else if (message.command === "revertFile") {
 		revertFile(message.relativeFilePath, message.fileChangeState as Types.FileChangeState, data.config?.showRevertFileWarning);
+	} else if (message.command === "revertHunk") {
+		revertHunk(message.relativeFilePath, message.hunkHeader, message.fileChangeState as Types.FileChangeState, data.config?.showRevertFileWarning);
 	} else if (message.command === "copyFilePath") {
 		copyFilePath(message.relativeFilePath);
 	} else if (message.command === "toggleViewedFile") {
@@ -361,14 +361,22 @@ function openFile(relativePath: string) {
 }
 
 function revertFile(relativePath: string, fileChangeState: Types.FileChangeState, withWarning: boolean | undefined) {
+	const fileDiff: FileDiff | undefined = getFileDiff(relativePath, fileChangeState);
+	if (!fileDiff) {
+		return;
+	} else {
+		revertAction(fileDiff.getRawFileDiff(), "file", withWarning, `Path: ${relativePath}`);
+	}
+}
+
+function getFileDiff(relativePath: string, fileChangeState: Types.FileChangeState): FileDiff | undefined {
 	let targetFilePathA: string;
 	let targetFilePathB: string;
 
-	let cmd = "";
-	if (fileChangeState == "CHANGED" || fileChangeState == "ADDED" || fileChangeState == "DELETED") {
+	if (fileChangeState === "CHANGED" || fileChangeState === "ADDED" || fileChangeState === "DELETED") {
 		targetFilePathA = relativePath;
 		targetFilePathB = relativePath;
-	} else if (fileChangeState == "MOVED") {
+	} else if (fileChangeState === "MOVED") {
 		targetFilePathA = getFilepathsForMovedAction(relativePath)[0];
 		targetFilePathB = getFilepathsForMovedAction(relativePath)[1];
 	} else {
@@ -376,23 +384,35 @@ function revertFile(relativePath: string, fileChangeState: Types.FileChangeState
 		return;
 	}
 
-	const fileDiff = new FileDiff(data.diffContent, targetFilePathA, targetFilePathB);
-	const tmpDiffFilePath = utils.createTempFile(`${uuidv4()}.diff`, fileDiff.getRawFileDiff());
-	cmd = `git apply -R -- ${tmpDiffFilePath}`;
+	return new FileDiff(data.diffContent, targetFilePathA, targetFilePathB);
+}
 
-	const revertFileAction = () => {
+function revertHunk(relativePath: string, hunkHeader: string, fileChangeState: Types.FileChangeState, withWarning: boolean | undefined) {
+	const fileDiff: FileDiff | undefined = getFileDiff(relativePath, fileChangeState);
+	if (!fileDiff) {
+		return;
+	} else {
+		revertAction(fileDiff.getUsableHunkDiffByHunkHeader(hunkHeader), "hunk", withWarning, `Hunk Header: ${hunkHeader}`);
+	}
+}
+
+function revertAction(diffContent: string, type: "file" | "hunk", withWarning: boolean | undefined, extraInfo: string) {
+	const tmpDiffFilePath = utils.createTempFile(`${uuidv4()}.diff`, diffContent);
+	const cmd = `git apply -R -- ${tmpDiffFilePath}`;
+
+	const revertJob = () => {
 		utils.execShell(cmd);
 		refresh(true);
 	};
 
 	if (withWarning) {
-		vscode.window.showInformationMessage(`Do you want to revert selected file?\nPath:${relativePath}\n\n\nCmd:${cmd}`, "Yes", "No").then((answer) => {
+		vscode.window.showInformationMessage(`Do you want to revert selected ${type}? - [${extraInfo}]`, "Yes", "No").then((answer) => {
 			if (answer === "Yes") {
-				revertFileAction();
+				revertJob();
 			}
 		});
 	} else {
-		revertFileAction();
+		revertJob();
 	}
 }
 

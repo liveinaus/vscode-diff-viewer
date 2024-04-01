@@ -98,7 +98,7 @@ function showDiff2HtmlUi() {
 		jQuery("#cmd-content").html(""); //clear cmd
 	}
 
-	addUiElementsToDiff2HtmlUi();
+	addUiElementsToDiff2HtmlUi(config);
 	jQuery(".custom-git-btn .btn-icon").toggle(config.showBtnIcon);
 	jQuery(".custom-git-btn .btn-long-desc").toggle(config.showBtnLongDesc);
 	jQuery(".custom-git-btn .btn-short-desc").toggle(config.showBtnShortDesc);
@@ -142,7 +142,10 @@ function clickedCustomGitBtn(evt) {
 	const command = jQuery(this).data("command");
 	const fileChangeState = jQuery(this).data("fileChangeState");
 	const relativeFilePath = jQuery(this).data("relativeFilePath");
-	vscode.postMessage({ command, fileChangeState, relativeFilePath });
+	const hunkHeader = jQuery(this).data("hunkHeader");
+	const isDisabledAfterClicked = jQuery(this).data("isDisabledAfterClicked");
+	jQuery(this).prop("disabled", Boolean(isDisabledAfterClicked));
+	vscode.postMessage({ command, fileChangeState, relativeFilePath, hunkHeader });
 }
 
 function refresh(isForced = false) {
@@ -150,7 +153,7 @@ function refresh(isForced = false) {
 	vscode.postMessage({ command, isForced });
 }
 
-function addUiElementsToDiff2HtmlUi() {
+function addUiElementsToDiff2HtmlUi(config) {
 	jQuery(".d2h-file-name-wrapper").each(function () {
 		const relativeFilePath = jQuery(this).find(".d2h-file-name").html();
 		const fileChangeState = getFileChangeState(this);
@@ -159,6 +162,32 @@ function addUiElementsToDiff2HtmlUi() {
 		addCustomGitBtn({ selector: this, action: "copyFilePath", title: "Copy File Path", relativeFilePath: relativeFilePath, fileChangeState: fileChangeState, iconClass: "fa-solid fa-copy", shortDesc: "C", longDesc: "Copy" });
 		addCustomGitBtn({ selector: this, btnClass: "custom-git-danger-btn", action: "revertFile", title: "Revert File", relativeFilePath: relativeFilePath, fileChangeState: fileChangeState, iconClass: "fa-solid fa-rotate-left", shortDesc: "R", longDesc: "Revert" });
 	});
+
+	if (config && config.enableRevertHunk) {
+		jQuery(".d2h-info .d2h-code-line")
+			.filter(function () {
+				return jQuery(this).html() && jQuery(this).html().trim() !== "File without changes";
+			})
+			.each(function () {
+				const jContainer = jQuery(this).closest(".d2h-info");
+				const jFileWrapper = jQuery(this).closest(".d2h-file-wrapper");
+				const relativeFilePath = jFileWrapper.find(".d2h-file-name").html();
+				const hunkHeader = jQuery(this).html().trim();
+				const fileChangeState = getFileChangeState(jFileWrapper);
+				addCustomGitBtn({
+					selector: jContainer,
+					btnClass: "custom-git-danger-btn",
+					action: "revertHunk",
+					title: "Revert Hunk",
+					relativeFilePath: relativeFilePath,
+					fileChangeState: fileChangeState,
+					iconClass: "fa-solid fa-rotate-left",
+					shortDesc: "R",
+					longDesc: "Revert",
+					hunkHeader: hunkHeader,
+				});
+			});
+	}
 }
 
 function getFileChangeState(selector) {
@@ -176,8 +205,18 @@ function getFileChangeState(selector) {
 }
 
 function addCustomGitBtn(options) {
-	const { selector, action, title, relativeFilePath, fileChangeState, iconClass, shortDesc, longDesc, btnClass } = options;
+	const { selector, action, title, relativeFilePath, fileChangeState, iconClass, shortDesc, longDesc, btnClass, hunkHeader, isDisabledAfterClicked } = options;
+	const hunkHeaderStr = addDataElement("hunk-header", hunkHeader);
+	const isDisabledAfterClickedStr = addDataElement("is-disabled-after-clicked", isDisabledAfterClicked);
+	const actionStr = addDataElement("command", action);
+	const fileChangeStateStr = addDataElement("file-change-state", fileChangeState);
+	const relativeFilePathStr = addDataElement("relative-file-path", relativeFilePath);
+
 	jQuery(selector).prepend(
-		`<button class="custom-git-btn ${btnClass}" data-command="${action}" title="${title}" data-relative-file-path="${relativeFilePath}" data-file-change-state="${fileChangeState}" ><span class="btn-icon"><i class="${iconClass}"></i></span><span class="btn-short-desc">${shortDesc}</span><span class="btn-long-desc">${longDesc}</span></button>`
+		`<button class="custom-git-btn ${btnClass}" title="${title}" ${actionStr} ${relativeFilePathStr} ${fileChangeStateStr} ${hunkHeaderStr} ${isDisabledAfterClickedStr}><span class="btn-icon"><i class="${iconClass}"></i></span><span class="btn-short-desc">${shortDesc}</span><span class="btn-long-desc">${longDesc}</span></button>`
 	);
+}
+
+function addDataElement(elementProp, data) {
+	return data ? `data-${elementProp}="${data}"` : "";
 }
