@@ -75,3 +75,11 @@
 #diff2html-header .btn-group > button {
 	margin: 0px;
 }
+
+.d2h-info .custom-git-btn {
+	position: absolute;
+	height: 16px;
+	line-height: 12px;
+	font-size: 10px;
+	left: 35px;
+}

@@ -18,6 +18,7 @@ export type BetterDiffViewerOptions = {
 	showBtnShortDesc?: boolean;
 	customCssStyle?: string;
 	preserveViewedFileState?: boolean;
+	enableRevertHunk?: boolean;
 	showCmd?: boolean;
 	zoomNum?: number;
 	showRevertFileWarning?: boolean;

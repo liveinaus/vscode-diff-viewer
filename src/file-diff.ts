@@ -11,6 +11,16 @@ ${this.getHunks()}
 `;
 	}
 
+	//A usable hunk diff means use selected hunk to make a diff file
+	getUsableHunkDiffByHunkHeader(hunkHeader: string): string {
+		for (const hunk of this.hunks) {
+			if (hunk.length > 0 && hunk[0].trim() === hunkHeader.trim()) {
+				return this.getHeader() + "\n" + hunk.join("\n") + "\n"; //usable hunk diff
+			}
+		}
+		utils.throwError("Cannot find hunk by " + hunkHeader);
+	}
+
 	getHeader(): string {
 		return this.header.join("\n");
 	}
