@@ -26,8 +26,8 @@ For example, view Diff in HTML, revert a file ...
 - [x] Store users view actions (i.e., remember viewed button for files)
 - [x] Zoom in/out
 - [x] Triggering extension commands from bottom toolbar
-- [ ] View content of a GIT commit
-- [ ] Specify panel location (i.e. in editor or panel)
+- [x] Specify panel location (i.e. in editor or panel)
+- [x] View content of a GIT commit
 - [ ] Support hunk action - e.g. revert hunk only code
 - [ ] Show and interact with git log tree
 
@@ -37,6 +37,8 @@ For example, view Diff in HTML, revert a file ...
 - `better-diff-viewer.viewRepoGitDiff`: view Git diff for current repository
 - `better-diff-viewer.viewGitDiffForFile`: view Git diff for current file
 - `better-diff-viewer.viewCustomDiffFromCmd`: View Diff from a custom command on current repository
+- `better-diff-viewer.viewChangesInCommit`: View Changes in selected commit
+- `better-diff-viewer.viewChangesBetweenCommits`: View Changes between selected commits
 
 ## Settings
 
@@ -50,6 +52,9 @@ For example, view Diff in HTML, revert a file ...
 | better-diff-viewer.preserveViewedFileState                      | true           | Preserve viewed checkbox state after diff viewer refresh                                                                     |
 | better-diff-viewer.showCmd                                      | true           | Set the default visibility of the command which used to generate the diff output. The cmd is shown at the bottom of the page |
 | better-diff-viewer.zoomNum                                      | 0.9            | Set default zoom level for the viewer                                                                                        |
+| better-diff-viewer.showRevertFileWarning                        | true           | Display a warning when reverting a file                                                                                      |
+| better-diff-viewer.componentsDisplayAtEditor                    | ["diffViewer"] | Components display at editor section - reload required                                                                       |
+| better-diff-viewer.componentsDisplayAtPanel                     | []             | Components display at panel section - reload required                                                                        |
 |                                                                 |                |                                                                                                                              |
 | better-diff-viewer.diff2html-ui.outputFormat                    | 'line-by-line' | 'line-by-line' or 'side-by-side'; a Diff2Html option                                                                         |
 | better-diff-viewer.diff2html-ui.drawFileList                    | true           | a Diff2Html option                                                                                                           |

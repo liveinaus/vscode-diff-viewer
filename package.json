@@ -5,7 +5,7 @@
 	"icon": "images/extension-icon.png",
 	"publisher": "SamWang",
 	"author": "Sam Wang",
-	"version": "0.0.7",
+	"version": "0.0.8",
 	"engines": {
 		"vscode": "^1.87.0"
 	},
@@ -15,8 +15,26 @@
 	"activationEvents": [
 		"onLanguage:diff"
 	],
-	"main": "./dist/extension.js",
+	"main": "./dist/main.js",
 	"contributes": {
+		"viewsContainers": {
+			"panel": [
+				{
+					"id": "bdv-view",
+					"title": "Better Diff View",
+					"icon": "test.icon"
+				}
+			]
+		},
+		"views": {
+			"bdv-view": [
+				{
+					"type": "webview",
+					"id": "better-diff-viewer.bdvView",
+					"name": "Diff View"
+				}
+			]
+		},
 		"commands": [
 			{
 				"command": "better-diff-viewer.viewDiffFile",
@@ -33,6 +51,14 @@
 			{
 				"command": "better-diff-viewer.viewCustomDiffFromCmd",
 				"title": "Better-diff-viewer: View Diff from a custom command"
+			},
+			{
+				"command": "better-diff-viewer.viewChangesInCommit",
+				"title": "Better-diff-viewer: View Changes in a commit"
+			},
+			{
+				"command": "better-diff-viewer.viewChangesBetweenCommits",
+				"title": "Better-diff-viewer: View Changes between commits"
 			}
 		]
 	},
@@ -52,6 +78,7 @@
 	"devDependencies": {
 		"@types/mocha": "^10.0.6",
 		"@types/node": "18.x",
+		"@types/uuid": "^9.0.8",
 		"@types/vscode": "^1.87.0",
 		"@typescript-eslint/eslint-plugin": "^7.0.2",
 		"@typescript-eslint/parser": "^7.0.2",
@@ -63,5 +90,8 @@
 		"typescript": "^5.3.3",
 		"webpack": "^5.90.3",
 		"webpack-cli": "^5.1.4"
+	},
+	"dependencies": {
+		"uuid": "^9.0.1"
 	}
 }
