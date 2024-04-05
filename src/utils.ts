@@ -1,9 +1,9 @@
 import * as cp from "child_process";
+import * as fs from "fs";
+import * as path from "path";
 import * as vscode from "vscode";
 export const UNCOMMITTED = "*";
 export let extensionPath: string;
-import * as fs from "fs";
-import * as path from "path";
 
 const tempFolderName = "temp";
 const repo: string = getRepoPath();
@@ -18,23 +18,24 @@ export function viewDiffInFile(fromHash: string, toHash: string, oldFilePath: st
 	if (toHash === "*") {
 		toHash = "";
 	}
-	return `cd '${repo}';git diff ${fromHash} ${toHash} -- '${oldFilePath}'`;
+	return `git diff ${fromHash} ${toHash} -- '${oldFilePath}'`;
 }
 
 export function viewGitDiffByPath(filePath: string): string {
-	return `cd '${repo}';git diff -- '${filePath}'`;
+	return `git diff -- '${filePath}'`;
 }
 
 export function viewGitDiffForRepo(): string {
 	const filePath = ".";
 
-	return `cd '${repo}'; git add -N --no-all ${filePath}; git diff ${filePath}`;
+	return `git add -N --no-all ${filePath}; git diff ${filePath}`;
 }
 
 export function execShell(cmd: string): string {
 	const preCmd = `cd '${repo}';`;
 	try {
-		return cp.execSync(`${preCmd} ${cmd}`).toString();
+		//use cat to stop pager
+		return cp.execSync(`${preCmd} ${cmd}`, { encoding: "utf8", maxBuffer: 50 * 1024 * 1024 }).toString();
 	} catch (e) {
 		throwError(`cannot get output from [[ ${cmd} ]]`);
 	}

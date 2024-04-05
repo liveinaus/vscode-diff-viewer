@@ -1,10 +1,10 @@
 import * as path from "path";
-import * as vscode from "vscode";
-import * as utils from "./utils";
-import * as Types from "./types";
-import * as config from "./config";
 import { v4 as uuidv4 } from "uuid";
+import * as vscode from "vscode";
+import * as config from "./config";
 import FileDiff from "./file-diff";
+import * as Types from "./types";
+import * as utils from "./utils";
 
 let extensionPath: string;
 let webviewPanel: vscode.WebviewPanel | undefined;
