@@ -1,6 +1,8 @@
 /* Color CSS */
 #diff2html-container {
 	background: white;
+	transform-origin: 0 0;
+	-moz-transform-origin: 0 0;
 }
 
 .bdv-cs-dark #diff2html-container {
@@ -9,6 +11,9 @@
 
 .d2h-file-name {
 	color: blue;
+	/* Expands to fill available space, pinning action buttons to the right */
+	flex: 1;
+	min-width: 0;
 }
 
 .bdv-cs-dark .d2h-file-name {
@@ -28,11 +33,6 @@
 }
 
 /* Normal CSS */
-#diff2html-container {
-	transform-origin: 0 0;
-	-moz-transform-origin: 0 0;
-}
-
 #diff2html-header {
 	margin-top: 5px;
 	margin-bottom: 5px;
@@ -43,10 +43,13 @@
 }
 
 .custom-git-btn {
-	margin-right: 5px;
 	display: flex;
 	height: 100%;
 	line-height: 30px;
+}
+
+.d2h-file-name-wrapper .custom-git-btn {
+	margin-left: 4px;
 }
 
 #no-diff-available {

@@ -252,6 +252,8 @@ function handleMessageFromWebview(message: any) {
 		setZoomNum(message.zoomNum);
 	} else if (message.command === "setShowCmd") {
 		setShowCmd(message.showCmd);
+	} else if (message.command === "gitAdd") {
+		gitAdd(message.relativeFilePath, message.fileChangeState as Types.FileChangeState);
 	}
 }
 
@@ -360,6 +362,18 @@ function revertHunk(relativePath: string, hunkHeader: string, fileChangeState: T
 	} else {
 		revertAction(fileDiff.getUsableHunkDiffByHunkHeader(hunkHeader), "hunk", withWarning, `Hunk Header: ${hunkHeader}`);
 	}
+}
+
+function gitAdd(relativePath: string, fileChangeState: Types.FileChangeState) {
+	let cmd: string;
+	if (fileChangeState === "MOVED") {
+		const [pathA, pathB] = getFilepathsForMovedAction(relativePath);
+		cmd = `git add -A -- '${utils.getAbsolutePath(pathA)}' '${utils.getAbsolutePath(pathB)}'`;
+	} else {
+		cmd = `git add -A -- '${utils.getAbsolutePath(relativePath)}'`;
+	}
+	utils.execShell(cmd);
+	refresh(true);
 }
 
 function revertAction(diffContent: string, type: "file" | "hunk", withWarning: boolean | undefined, extraInfo: string) {

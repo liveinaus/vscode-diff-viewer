@@ -159,6 +159,7 @@ function addUiElementsToDiff2HtmlUi(config) {
 		const fileChangeState = getFileChangeState(this);
 		addCustomGitBtn({ selector: this, action: "openFile", title: "Open File", relativeFilePath: relativeFilePath, fileChangeState: fileChangeState, iconClass: "fa-solid fa-folder-open", shortDesc: "O", longDesc: "Open" });
 		addCustomGitBtn({ selector: this, action: "copyFilePath", title: "Copy File Path", relativeFilePath: relativeFilePath, fileChangeState: fileChangeState, iconClass: "fa-solid fa-copy", shortDesc: "C", longDesc: "Copy" });
+		addCustomGitBtn({ selector: this, action: "gitAdd", title: "Stage File", relativeFilePath: relativeFilePath, fileChangeState: fileChangeState, iconClass: "fa-solid fa-plus", shortDesc: "A", longDesc: "Add", isDisabledAfterClicked: true });
 		addCustomGitBtn({ selector: this, btnClass: "custom-git-danger-btn", action: "revertFile", title: "Revert File", relativeFilePath: relativeFilePath, fileChangeState: fileChangeState, iconClass: "fa-solid fa-rotate-left", shortDesc: "R", longDesc: "Revert" });
 	});
 
@@ -211,7 +212,7 @@ function addCustomGitBtn(options) {
 	const fileChangeStateStr = addDataElement("file-change-state", fileChangeState);
 	const relativeFilePathStr = addDataElement("relative-file-path", relativeFilePath);
 
-	jQuery(selector).prepend(
+	jQuery(selector).append(
 		`<button class="custom-git-btn ${btnClass}" title="${title}" ${actionStr} ${relativeFilePathStr} ${fileChangeStateStr} ${hunkHeaderStr} ${isDisabledAfterClickedStr}><span class="btn-icon"><i class="${iconClass}"></i></span><span class="btn-short-desc">${shortDesc}</span><span class="btn-long-desc">${longDesc}</span></button>`
 	);
 }
