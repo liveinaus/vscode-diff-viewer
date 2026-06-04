@@ -41,28 +41,18 @@ export function deactivate() {
 }
 
 function addToolbarBtns(context: vscode.ExtensionContext) {
-	// Create a status bar item
 	const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
-
-	// Set the text and tooltip for the status bar item
 	statusBarItem.text = "Uncommitted";
 	statusBarItem.tooltip = "View Uncommitted Changes";
-
-	// Assign a command to the status bar item
 	statusBarItem.command = "better-diff-viewer.viewRepoGitDiff";
-
-	// Show the status bar item
 	statusBarItem.show();
-
-	// Register a disposable to dispose the status bar item when the extension is deactivated
 	context.subscriptions.push(statusBarItem);
 }
 
-function actionWhenFileExtensionDetected(document: any) {
+function actionWhenFileExtensionDetected(document: vscode.TextDocument) {
 	if (document.languageId === "diff" || document.languageId === "plaintext") {
 		if (document.fileName.endsWith("diff") || document.fileName.endsWith(".patch")) {
-			const textDoc: vscode.TextDocument = document as vscode.TextDocument;
-			viewDiffDocument(textDoc);
+			viewDiffDocument(document);
 		}
 	}
 }
@@ -122,13 +112,7 @@ async function viewChangesInCommit() {
 
 function getSelectableCommits(): string[] {
 	const cmd = "git --no-pager log --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset'";
-	const output: string = utils.execShell(cmd);
-	const commits: string[] = output.split("\n");
-	if (!commits) {
-		vscode.window.showErrorMessage("No commits found.");
-		return [];
-	}
-	return commits;
+	return utils.execShell(cmd).split("\n");
 }
 
 function getCommitHash(commit: string) {
@@ -242,7 +226,6 @@ function prepareWebviewInner(webview: vscode.Webview, overwriteHtml?: string) {
         </body>
         </html>
     `;
-	//update htmlContent by settings
 	webview.html = htmlContent;
 }
 
@@ -273,24 +256,22 @@ function handleMessageFromWebview(message: any) {
 }
 
 function refreshData() {
-	if (data?.cmd) {
+	if (data.cmd) {
 		updateDataByCmd(data.cmd);
 	}
 }
 
 function autoRefresh() {
-	if (data?.config?.isAutoRefresh) {
+	if (data.config?.isAutoRefresh) {
 		refresh(false);
 	}
 }
 
-function refresh(isForced: any) {
+function refresh(isForced: boolean) {
 	const oldDataStr = JSON.stringify(data);
 	refreshData();
-	if (isForced || !oldDataStr || oldDataStr !== JSON.stringify(data)) {
+	if (isForced || oldDataStr !== JSON.stringify(data)) {
 		doAction("showDiffContent", data);
-	} else {
-		//do nothing - there is no change to the data or config
 	}
 }
 
@@ -312,42 +293,28 @@ function copyFilePath(path: string) {
 }
 
 function toggleViewedFile(relativeFilePath: string, isViewed: boolean) {
-	if (!data) {
-		data = {};
-	}
-
-	if (!data?.userAction) {
+	if (!data.userAction) {
 		data.userAction = { viewedFiles: [] };
 	}
 
 	if (isViewed) {
-		//add
 		data.userAction.viewedFiles = data.userAction.viewedFiles ? data.userAction.viewedFiles.concat([relativeFilePath]) : [relativeFilePath];
 	} else {
-		//remove
 		data.userAction.viewedFiles = data.userAction.viewedFiles ? data.userAction.viewedFiles.filter((x) => x !== relativeFilePath) : [];
 	}
 }
 
 function setZoomNum(zoomNum: number) {
-	if (!data) {
-		data = {};
-	}
-
-	if (!data?.userAction) {
-		data.userAction = { zoomNum: zoomNum };
+	if (!data.userAction) {
+		data.userAction = { zoomNum };
 	} else {
 		data.userAction.zoomNum = zoomNum;
 	}
 }
 
 function setShowCmd(showCmd: boolean) {
-	if (!data) {
-		data = {};
-	}
-
-	if (!data?.userAction) {
-		data.userAction = { showCmd: showCmd };
+	if (!data.userAction) {
+		data.userAction = { showCmd };
 	} else {
 		data.userAction.showCmd = showCmd;
 	}
@@ -377,8 +344,7 @@ function getFileDiff(relativePath: string, fileChangeState: Types.FileChangeStat
 		targetFilePathA = relativePath;
 		targetFilePathB = relativePath;
 	} else if (fileChangeState === "MOVED") {
-		targetFilePathA = getFilepathsForMovedAction(relativePath)[0];
-		targetFilePathB = getFilepathsForMovedAction(relativePath)[1];
+		[targetFilePathA, targetFilePathB] = getFilepathsForMovedAction(relativePath);
 	} else {
 		vscode.window.showErrorMessage(`Cannot revert a file for [${fileChangeState}]`);
 		return;

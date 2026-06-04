@@ -1,7 +1,6 @@
 import * as utils from "./utils";
 
 export default class FileDiff {
-	content: string = "";
 	header: string[] = [];
 	hunks: string[][] = [];
 
@@ -32,36 +31,32 @@ ${this.getHunks()}
 	constructor(rawDiffContent: string | undefined, targetFilePathA: string, targetFilePathB: string) {
 		if (!rawDiffContent) {
 			utils.throwError("rawDiffContent is undefined");
-		} else {
-			const diffLines = rawDiffContent.split("\n");
-			let inScopeOfFile: boolean = false;
-			for (let i = 0; i < diffLines.length; i++) {
-				const line = diffLines[i];
-				if (line.startsWith("diff --git")) {
-					const match = line.match(/diff --git a\/(.+?) b\/(.+)/);
-					if (match && inScopeOfFile) {
-						//reach next diff file - stop searching
-						break;
-					} else if (match) {
-						const filePathA = match[1];
-						const filePathB = match[2];
-						inScopeOfFile = filePathA === targetFilePathA && filePathB === targetFilePathB;
-						if (inScopeOfFile) {
-							this.header.push(line);
-						}
-					}
-				} else if (line.startsWith("@@")) {
+		}
+		const diffLines = rawDiffContent.split("\n");
+		let inScopeOfFile = false;
+		for (const line of diffLines) {
+			if (line.startsWith("diff --git")) {
+				const match = /diff --git a\/(.+?) b\/(.+)/.exec(line);
+				if (match && inScopeOfFile) {
+					//reach next diff file - stop searching
+					break;
+				} else if (match) {
+					const filePathA = match[1];
+					const filePathB = match[2];
+					inScopeOfFile = filePathA === targetFilePathA && filePathB === targetFilePathB;
 					if (inScopeOfFile) {
-						this.hunks.push([line]);
+						this.header.push(line);
 					}
+				}
+			} else if (line.startsWith("@@")) {
+				if (inScopeOfFile) {
+					this.hunks.push([line]);
+				}
+			} else if (inScopeOfFile) {
+				if (this.hunks.length > 0) {
+					this.hunks.at(-1)?.push(line);
 				} else {
-					if (inScopeOfFile) {
-						if (this.hunks.length > 0) {
-							this.hunks[this.hunks.length - 1].push(line);
-						} else {
-							this.header.push(line);
-						}
-					}
+					this.header.push(line);
 				}
 			}
 		}

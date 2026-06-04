@@ -34,8 +34,7 @@ export function viewGitDiffForRepo(): string {
 export function execShell(cmd: string): string {
 	const preCmd = `cd '${repo}';`;
 	try {
-		//use cat to stop pager
-		return cp.execSync(`${preCmd} ${cmd}`, { encoding: "utf8", maxBuffer: 50 * 1024 * 1024 }).toString();
+		return cp.execSync(`${preCmd} ${cmd}`, { encoding: "utf8", maxBuffer: 50 * 1024 * 1024 });
 	} catch (e) {
 		throwError(`cannot get output from [[ ${cmd} ]]`);
 	}
@@ -73,7 +72,6 @@ export function createTempFile(filename: string, fileContent: string) {
 export function clearTempFolder() {
 	const tempPath = path.join(extensionPath, tempFolderName);
 	if (fs.existsSync(tempPath)) {
-		fs.readdirSync;
 		for (const file of fs.readdirSync(tempPath)) {
 			fs.unlinkSync(path.join(tempPath, file));
 		}

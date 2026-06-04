@@ -157,7 +157,6 @@ function addUiElementsToDiff2HtmlUi(config) {
 	jQuery(".d2h-file-name-wrapper").each(function () {
 		const relativeFilePath = jQuery(this).find(".d2h-file-name").html();
 		const fileChangeState = getFileChangeState(this);
-		console.log("relativeFilePath", relativeFilePath, "fileChangeState", fileChangeState);
 		addCustomGitBtn({ selector: this, action: "openFile", title: "Open File", relativeFilePath: relativeFilePath, fileChangeState: fileChangeState, iconClass: "fa-solid fa-folder-open", shortDesc: "O", longDesc: "Open" });
 		addCustomGitBtn({ selector: this, action: "copyFilePath", title: "Copy File Path", relativeFilePath: relativeFilePath, fileChangeState: fileChangeState, iconClass: "fa-solid fa-copy", shortDesc: "C", longDesc: "Copy" });
 		addCustomGitBtn({ selector: this, btnClass: "custom-git-danger-btn", action: "revertFile", title: "Revert File", relativeFilePath: relativeFilePath, fileChangeState: fileChangeState, iconClass: "fa-solid fa-rotate-left", shortDesc: "R", longDesc: "Revert" });
