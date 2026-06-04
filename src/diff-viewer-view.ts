@@ -418,7 +418,7 @@ async function showLog(relativePath: string) {
 	}
 
 	const selected = await vscode.window.showQuickPick(commits, { placeHolder: `Select a commit for ${relativePath}` });
-	if (!selected) return;
+	if (!selected) { return; }
 
 	const hash = getCommitHash(selected);
 	updateDataByCmd(`git diff ${hash}~ ${hash} -- '${relativePath}'`);

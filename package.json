@@ -7,7 +7,7 @@
 	"author": "Sam Wang",
 	"version": "1.1.0",
 	"engines": {
-		"vscode": "^1.87.0"
+		"vscode": "^1.120.0"
 	},
 	"categories": [
 		"Other"
