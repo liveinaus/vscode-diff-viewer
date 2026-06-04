@@ -273,6 +273,8 @@ function handleMessageFromWebview(message: any) {
 		gitUnstage(message.relativeFilePath, message.fileChangeState as Types.FileChangeState);
 	} else if (message.command === "switchDiffMode") {
 		switchDiffMode(message.viewMode as "unstaged" | "staged");
+	} else if (message.command === "showLog") {
+		showLog(message.relativeFilePath);
 	}
 }
 
@@ -381,6 +383,24 @@ function revertHunk(relativePath: string, hunkHeader: string, fileChangeState: T
 	} else {
 		revertAction(fileDiff.getUsableHunkDiffByHunkHeader(hunkHeader), "hunk", withWarning, `Hunk Header: ${hunkHeader}`);
 	}
+}
+
+async function showLog(relativePath: string) {
+	const logCmd = `git --no-pager log --follow --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' -- '${relativePath}'`;
+	const commits = utils.execShell(logCmd).split("\n").filter(Boolean);
+
+	if (!commits.length) {
+		vscode.window.showInformationMessage(`No commits found for ${relativePath}`);
+		return;
+	}
+
+	const selected = await vscode.window.showQuickPick(commits, { placeHolder: `Select a commit for ${relativePath}` });
+	if (!selected) return;
+
+	const hash = getCommitHash(selected);
+	updateDataByCmd(`git diff ${hash}~ ${hash} -- '${relativePath}'`);
+	data.viewMode = "commit";
+	doAction("showDiffContent", data);
 }
 
 function switchDiffMode(viewMode: "unstaged" | "staged") {

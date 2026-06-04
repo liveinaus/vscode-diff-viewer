@@ -193,6 +193,7 @@ function addUiElementsToDiff2HtmlUi(config) {
 		const fileChangeState = getFileChangeState(this);
 		addCustomGitBtn({ selector: this, action: "openFile", title: "Open File", relativeFilePath: relativeFilePath, fileChangeState: fileChangeState, iconClass: "fa-solid fa-folder-open", shortDesc: "O", longDesc: "Open" });
 		addCustomGitBtn({ selector: this, action: "copyFilePath", title: "Copy File Path", relativeFilePath: relativeFilePath, fileChangeState: fileChangeState, iconClass: "fa-solid fa-copy", shortDesc: "C", longDesc: "Copy" });
+		addCustomGitBtn({ selector: this, action: "showLog", title: "View File History", relativeFilePath: relativeFilePath, fileChangeState: fileChangeState, iconClass: "fa-solid fa-clock-rotate-left", shortDesc: "L", longDesc: "Log" });
 		if (isStagedView) {
 			addCustomGitBtn({ selector: this, action: "gitUnstage", title: "Remove from Staged", relativeFilePath: relativeFilePath, fileChangeState: fileChangeState, iconClass: "fa-solid fa-minus", shortDesc: "R", longDesc: "Remove", isDisabledAfterClicked: true });
 		} else {
