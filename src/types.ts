@@ -3,7 +3,7 @@ export type DiffViewerData = {
 	diffContent?: string;
 	config?: BetterDiffViewerOptions;
 	userAction?: UserAction;
-	viewMode?: "unstaged" | "staged";
+	viewMode?: "unstaged" | "staged" | "file" | "commit" | "commits" | "custom" | "diffFile";
 };
 
 export type UserAction = {

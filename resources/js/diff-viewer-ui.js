@@ -39,6 +39,10 @@ function addButtonListeners() {
 	jQuery("#zoom-out-btn").on("click", () => {
 		setZoom(false);
 	});
+
+	jQuery("#diff-mode-select").on("change", function () {
+		vscode.postMessage({ command: "switchDiffMode", viewMode: this.value });
+	});
 }
 
 function setShowCmd(showCmd) {
@@ -76,9 +80,37 @@ function displayNoCmd() {
 	jQuery("#hide-cmd-btn").toggle(false);
 }
 
+const MODE_LABELS = {
+	unstaged: "Uncommitted",
+	staged: "To be Committed",
+	file: "File Diff",
+	commit: "Commit Diff",
+	commits: "Commits Diff",
+	custom: "Custom Diff",
+	diffFile: "Diff File",
+};
+const SWITCHABLE_MODES = ["unstaged", "staged"];
+
+function displayDiffMode(viewMode) {
+	const select = jQuery("#diff-mode-select");
+	if (!viewMode) {
+		select.hide();
+		return;
+	}
+	select.empty();
+	if (!SWITCHABLE_MODES.includes(viewMode)) {
+		// Show the current read-only mode as a greyed label at the top
+		select.append(`<option value="${viewMode}" disabled>${MODE_LABELS[viewMode] ?? viewMode}</option>`);
+	}
+	SWITCHABLE_MODES.forEach(m => select.append(`<option value="${m}">${MODE_LABELS[m]}</option>`));
+	select.prop("disabled", false).val(viewMode).show();
+}
+
 function showDiff2HtmlUi() {
-	const { diffContent, config, cmd, userAction } = data;
+	const { diffContent, config, cmd, userAction, viewMode } = data;
 	jQuery("#custom-css-style").html(config.customCssStyle);
+
+	displayDiffMode(viewMode);
 
 	if (cmd) {
 		displayShowCmd(Boolean(userAction?.showCmd));
@@ -122,7 +154,7 @@ function prepareFileViewed() {
 	//Restore viewed file status
 	jQuery(".d2h-file-collapse-input").each(function () {
 		const relativeFilePath = jQuery(this).closest(".d2h-file-wrapper").find(".d2h-file-name").html();
-		if (data && data.userAction && data.userAction.viewedFiles && data.userAction.viewedFiles.indexOf(relativeFilePath) > -1) {
+		if (data?.userAction?.viewedFiles?.includes(relativeFilePath)) {
 			jQuery(this).prop("checked", true);
 			jQuery(this).closest(".d2h-file-collapse").addClass("d2h-selected");
 			jQuery(this).closest(".d2h-file-wrapper").find(".d2h-file-diff").addClass("d2h-d-none");
@@ -169,7 +201,7 @@ function addUiElementsToDiff2HtmlUi(config) {
 		}
 	});
 
-	if (!isStagedView && config && config.enableRevertHunk) {
+	if (!isStagedView && config?.enableRevertHunk) {
 		jQuery(".d2h-info .d2h-code-line")
 			.filter(function () {
 				return jQuery(this).html() && jQuery(this).html().trim() !== "File without changes";

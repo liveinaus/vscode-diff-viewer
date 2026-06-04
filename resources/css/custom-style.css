@@ -21,6 +21,7 @@
 }
 
 .bdv-cs-dark button,
+.bdv-cs-dark select,
 .bdv-cs-dark .d2h-file-collapse {
 	background-color: #333;
 	color: #fff;
@@ -38,8 +39,10 @@
 	margin-bottom: 5px;
 }
 
-#diff2html-header button {
+#diff2html-header button,
+#diff2html-header select {
 	margin-right: 5px;
+	vertical-align: middle;
 }
 
 .custom-git-btn {

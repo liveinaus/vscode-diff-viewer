@@ -76,7 +76,7 @@ function viewGitDiffForFile() {
 	const filePath = editor?.document.uri.fsPath;
 	if (filePath) {
 		updateDataByCmd(utils.viewGitDiffByPath(filePath));
-		data.viewMode = "unstaged";
+		data.viewMode = "file";
 		doAction("showDiffContent", data);
 	} else {
 		utils.throwError("cannot find file path from current active text editor");
@@ -93,7 +93,7 @@ async function viewCustomDiffFromCmd() {
 	if (customCmd) {
 		prepareViewerWebview();
 		updateDataByCmd(customCmd);
-		data.viewMode = undefined;
+		data.viewMode = "custom";
 		doAction("showDiffContent", data);
 		lastUserCustomCmd = customCmd;
 	} else {
@@ -110,7 +110,7 @@ async function viewChangesInCommit() {
 	const customCmd = `git diff ${commitHash}~ ${commitHash}`;
 	prepareViewerWebview();
 	updateDataByCmd(customCmd);
-	data.viewMode = undefined;
+	data.viewMode = "commit";
 	doAction("showDiffContent", data);
 }
 
@@ -135,7 +135,7 @@ async function viewChangesBetweenCommits() {
 	const customCmd = `git diff ${getCommitHash(selectedCommit1)} ${getCommitHash(selectedCommit2)}`;
 	prepareViewerWebview();
 	updateDataByCmd(customCmd);
-	data.viewMode = undefined;
+	data.viewMode = "commits";
 	doAction("showDiffContent", data);
 }
 
@@ -166,7 +166,7 @@ function viewDiffFile() {
 function viewDiffDocument(document: vscode.TextDocument) {
 	prepareViewerWebview();
 	updateDataByDiffContent(document.getText());
-	data.viewMode = undefined;
+	data.viewMode = "diffFile";
 	doAction("showDiffContent", data);
 }
 
@@ -228,6 +228,7 @@ function prepareWebviewInner(webview: vscode.Webview, overwriteHtml?: string) {
             <div id="main-container">
               <div id="diff2html-header">
                 <button id="refresh-btn">Refresh</button>
+                <select id="diff-mode-select" style="display:none"></select>
                 <button id="show-cmd-btn">Show CMD</button><button id="hide-cmd-btn">Hide CMD</button>
                 <span class="btn-group"><button id="zoom-in-btn"><i class="fa-solid fa-plus"></i></button>
                 <button id="zoom-out-btn"><i class="fa-solid fa-minus"></i></button></span>
@@ -270,6 +271,8 @@ function handleMessageFromWebview(message: any) {
 		gitAdd(message.relativeFilePath, message.fileChangeState as Types.FileChangeState);
 	} else if (message.command === "gitUnstage") {
 		gitUnstage(message.relativeFilePath, message.fileChangeState as Types.FileChangeState);
+	} else if (message.command === "switchDiffMode") {
+		switchDiffMode(message.viewMode as "unstaged" | "staged");
 	}
 }
 
@@ -378,6 +381,17 @@ function revertHunk(relativePath: string, hunkHeader: string, fileChangeState: T
 	} else {
 		revertAction(fileDiff.getUsableHunkDiffByHunkHeader(hunkHeader), "hunk", withWarning, `Hunk Header: ${hunkHeader}`);
 	}
+}
+
+function switchDiffMode(viewMode: "unstaged" | "staged") {
+	if (viewMode === "staged") {
+		updateDataByCmd(utils.viewStagedDiffForRepo());
+		data.viewMode = "staged";
+	} else {
+		updateDataByCmd(utils.viewGitDiffForRepo());
+		data.viewMode = "unstaged";
+	}
+	doAction("showDiffContent", data);
 }
 
 function gitUnstage(relativePath: string, fileChangeState: Types.FileChangeState) {
