@@ -45,6 +45,7 @@ export function getAppConfig(): Types.BetterDiffViewerOptions {
 		showCmd: true,
 		zoomNum: 0.9,
 		showRevertFileWarning: true,
+		maxDiffLinesPerFile: 3000,
 		componentsDisplayAtEditor: [diffViewerView.componentCode],
 		componentsDisplayAtPanel: [],
 	};
@@ -60,6 +61,7 @@ export function getAppConfig(): Types.BetterDiffViewerOptions {
 		showCmd: getBooleanUserConfig("showCmd"),
 		zoomNum: getNumberUserConfig("zoomNum"),
 		showRevertFileWarning: getBooleanUserConfig("showRevertFileWarning"),
+		maxDiffLinesPerFile: getNumberUserConfig("maxDiffLinesPerFile"),
 		componentsDisplayAtEditor: getArrayUserConfig("componentsDisplayAtEditor"),
 		componentsDisplayAtPanel: getArrayUserConfig("componentsDisplayAtPanel"),
 	};
@@ -68,44 +70,33 @@ export function getAppConfig(): Types.BetterDiffViewerOptions {
 }
 
 function getArrayUserConfig(key: string): string[] | undefined {
-	if (typeof userConfig.get(key) === "undefined") {
-		return undefined;
-	} else {
-		return userConfig.get(key);
-	}
+	return userConfig.get<string[]>(key);
 }
 
 function getBooleanUserConfig(key: string): boolean | undefined {
-	if (typeof userConfig.get(key) === "undefined") {
-		return undefined;
-	} else {
-		return userConfig.get(key) === "true" || userConfig.get(key) === true;
-	}
+	const val = userConfig.get(key);
+	if (val === undefined) return undefined;
+	return val === "true" || val === true;
 }
 
 function getNumberUserConfig(key: string): number | undefined {
-	if (typeof userConfig.get(key) === "undefined") {
-		return undefined;
-	} else {
-		return Number(userConfig.get(key));
-	}
+	const val = userConfig.get(key);
+	if (val === undefined) return undefined;
+	return Number(val);
 }
 
 function getStringUserConfig(key: string): string | undefined {
-	if (typeof userConfig.get(key) === "undefined") {
-		return undefined;
-	} else {
-		return String(userConfig.get(key));
-	}
+	const val = userConfig.get(key);
+	if (val === undefined) return undefined;
+	return String(val);
 }
 
 function getUserDefinedViewMode(): "dark" | "light" {
 	const userConfigColorSchema = userConfig.get("diff2html-ui.colorScheme");
-	if (userConfigColorSchema && (userConfigColorSchema === "dark" || userConfigColorSchema === "light")) {
+	if (userConfigColorSchema === "dark" || userConfigColorSchema === "light") {
 		return userConfigColorSchema;
-	} else {
-		return getDefaultViewMode();
 	}
+	return getDefaultViewMode();
 }
 
 function getDefaultViewMode(): "dark" | "light" {

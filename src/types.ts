@@ -3,6 +3,7 @@ export type DiffViewerData = {
 	diffContent?: string;
 	config?: BetterDiffViewerOptions;
 	userAction?: UserAction;
+	viewMode?: "unstaged" | "staged" | "file" | "commit" | "commits" | "custom" | "diffFile";
 };
 
 export type UserAction = {
@@ -22,6 +23,7 @@ export type BetterDiffViewerOptions = {
 	showCmd?: boolean;
 	zoomNum?: number;
 	showRevertFileWarning?: boolean;
+	maxDiffLinesPerFile?: number;
 	componentsDisplayAtEditor?: string[];
 	componentsDisplayAtPanel?: string[];
 	"diff2html-ui": {};

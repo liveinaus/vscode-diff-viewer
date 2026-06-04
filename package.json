@@ -5,7 +5,7 @@
 	"icon": "images/extension-icon.png",
 	"publisher": "SamWang",
 	"author": "Sam Wang",
-	"version": "1.0.1",
+	"version": "1.1.0",
 	"engines": {
 		"vscode": "^1.87.0"
 	},
@@ -13,6 +13,7 @@
 		"Other"
 	],
 	"activationEvents": [
+		"onStartupFinished",
 		"onLanguage:diff"
 	],
 	"main": "./dist/main.js",
@@ -35,6 +36,17 @@
 				}
 			]
 		},
+		"configuration": {
+			"title": "Better Diff Viewer",
+			"properties": {
+				"better-diff-viewer.maxDiffLinesPerFile": {
+					"type": "number",
+					"default": 3000,
+					"minimum": 100,
+					"description": "Maximum lines shown per file in the diff view. Files exceeding this limit are truncated. Binary patch data is always excluded regardless of this setting."
+				}
+			}
+		},
 		"commands": [
 			{
 				"command": "better-diff-viewer.viewDiffFile",
@@ -43,6 +55,10 @@
 			{
 				"command": "better-diff-viewer.viewRepoGitDiff",
 				"title": "Better-diff-viewer: View Uncommitted Changes"
+			},
+			{
+				"command": "better-diff-viewer.viewStagedChanges",
+				"title": "Better-diff-viewer: View Changes to be Committed"
 			},
 			{
 				"command": "better-diff-viewer.viewGitDiffForFile",
@@ -59,8 +75,24 @@
 			{
 				"command": "better-diff-viewer.viewChangesBetweenCommits",
 				"title": "Better-diff-viewer: View Changes between commits"
+			},
+			{
+				"command": "better-diff-viewer.toggleFileDiff",
+				"title": "Better-diff-viewer: Toggle File Diff",
+				"icon": {
+					"light": "./images/extension-icon.png",
+					"dark": "./images/extension-icon.png"
+				}
 			}
-		]
+		],
+		"menus": {
+			"editor/title": [
+				{
+					"command": "better-diff-viewer.toggleFileDiff",
+					"group": "navigation"
+				}
+			]
+		}
 	},
 	"repository": "https://github.com/liveinaus/vscode-diff-viewer",
 	"scripts": {
@@ -76,19 +108,19 @@
 		"deploy": "vsce publish"
 	},
 	"devDependencies": {
-		"@types/mocha": "^10.0.6",
-		"@types/node": "18.x",
+		"@types/mocha": "^10.0.10",
+		"@types/node": "^18.19.130",
 		"@types/uuid": "^9.0.8",
-		"@types/vscode": "^1.87.0",
-		"@typescript-eslint/eslint-plugin": "^7.0.2",
-		"@typescript-eslint/parser": "^7.0.2",
-		"@vscode/test-cli": "^0.0.6",
-		"@vscode/test-electron": "^2.3.9",
-		"@vscode/vsce": "^2.24.0",
-		"eslint": "^8.56.0",
-		"ts-loader": "^9.5.1",
-		"typescript": "^5.3.3",
-		"webpack": "^5.90.3",
+		"@types/vscode": "^1.120.0",
+		"@typescript-eslint/eslint-plugin": "^7.18.0",
+		"@typescript-eslint/parser": "^7.18.0",
+		"@vscode/test-cli": "^0.0.12",
+		"@vscode/test-electron": "^2.5.2",
+		"@vscode/vsce": "^2.32.0",
+		"eslint": "^8.57.1",
+		"ts-loader": "^9.6.0",
+		"typescript": "^5.9.3",
+		"webpack": "^5.107.2",
 		"webpack-cli": "^5.1.4"
 	},
 	"dependencies": {

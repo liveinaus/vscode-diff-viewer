@@ -20,6 +20,12 @@ For example, view Diff in HTML, revert a file ...
 
 - [x] View .diff/.patch or git diff in Diff2HTML-UI
 - [x] View diff for uncommitted changes
+- [x] View staged changes (to be committed)
+- [x] Stage a file directly from the diff view
+- [x] Unstage a file directly from the staged diff view
+- [x] Switch between Uncommitted and To be Committed via a toolbar dropdown
+- [x] View commit history for a specific file and inspect any commit's diff scoped to that file
+- [x] Editor title bar icon to instantly toggle the current file's diff view — click once to open, click again to close
 - [x] Dark/light/auto mode support
 - [x] Diff2Html-UI user configurable settings
 - [x] Trigger content refresh manually
@@ -35,16 +41,20 @@ For example, view Diff in HTML, revert a file ...
 - [x] Specify panel location (i.e. in editor or panel)
 - [x] View content of a GIT commit
 - [x] Support hunk action - e.g. revert hunk only code
+- [x] Binary file protection - large binary patches are automatically excluded to prevent renderer hangs
+- [x] Configurable max diff lines per file to handle very large diffs
 - [ ] Show and interact with git log tree
 
 ## Commands
 
 - `better-diff-viewer.viewDiffFile`: view diff for current .diff/.patch file
-- `better-diff-viewer.viewRepoGitDiff`: view Git diff for current repository
+- `better-diff-viewer.viewRepoGitDiff`: view Git diff for current repository (uncommitted changes)
+- `better-diff-viewer.viewStagedChanges`: view staged changes (to be committed)
 - `better-diff-viewer.viewGitDiffForFile`: view Git diff for current file
-- `better-diff-viewer.viewCustomDiffFromCmd`: View Diff from a custom command on current repository
-- `better-diff-viewer.viewChangesInCommit`: View Changes in selected commit
-- `better-diff-viewer.viewChangesBetweenCommits`: View Changes between selected commits
+- `better-diff-viewer.viewCustomDiffFromCmd`: view diff from a custom command on current repository
+- `better-diff-viewer.viewChangesInCommit`: view changes in a selected commit
+- `better-diff-viewer.viewChangesBetweenCommits`: view changes between two selected commits
+- `better-diff-viewer.toggleFileDiff`: toggle the diff view for the currently active file (also available as an icon in the editor title bar)
 
 ## Settings
 
@@ -60,6 +70,7 @@ For example, view Diff in HTML, revert a file ...
 | better-diff-viewer.showCmd                                      | true           | Set the default visibility of the command which used to generate the diff output. The cmd is shown at the bottom of the page |
 | better-diff-viewer.zoomNum                                      | 0.9            | Set default zoom level for the viewer                                                                                        |
 | better-diff-viewer.showRevertFileWarning                        | true           | Display a warning when reverting a file                                                                                      |
+| better-diff-viewer.maxDiffLinesPerFile                          | 3000           | Maximum lines shown per file in the diff view; files exceeding this limit are truncated. Binary patch data always excluded   |
 | better-diff-viewer.componentsDisplayAtEditor                    | ["diffViewer"] | Components display at editor section - reload required                                                                       |
 | better-diff-viewer.componentsDisplayAtPanel                     | []             | Components display at panel section - reload required                                                                        |
 |                                                                 |                |                                                                                                                              |
