@@ -35,6 +35,8 @@
 
 /* Normal CSS */
 #diff2html-header {
+	display: flex;
+	align-items: center;
 	margin-top: 5px;
 	margin-bottom: 5px;
 }
@@ -42,8 +44,12 @@
 #diff2html-header button,
 #diff2html-header select {
 	margin-right: 5px;
-	vertical-align: middle;
 }
+
+#diff2html-header select {
+	align-self: stretch;
+}
+
 
 .custom-git-btn {
 	display: flex;

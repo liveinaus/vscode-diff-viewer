@@ -5,7 +5,7 @@
 	"icon": "images/extension-icon.png",
 	"publisher": "SamWang",
 	"author": "Sam Wang",
-	"version": "1.0.1",
+	"version": "1.1.0",
 	"engines": {
 		"vscode": "^1.87.0"
 	},
@@ -13,6 +13,7 @@
 		"Other"
 	],
 	"activationEvents": [
+		"onStartupFinished",
 		"onLanguage:diff"
 	],
 	"main": "./dist/main.js",
@@ -74,8 +75,24 @@
 			{
 				"command": "better-diff-viewer.viewChangesBetweenCommits",
 				"title": "Better-diff-viewer: View Changes between commits"
+			},
+			{
+				"command": "better-diff-viewer.toggleFileDiff",
+				"title": "Better-diff-viewer: Toggle File Diff",
+				"icon": {
+					"light": "./images/extension-icon.png",
+					"dark": "./images/extension-icon.png"
+				}
 			}
-		]
+		],
+		"menus": {
+			"editor/title": [
+				{
+					"command": "better-diff-viewer.toggleFileDiff",
+					"group": "navigation"
+				}
+			]
+		}
 	},
 	"repository": "https://github.com/liveinaus/vscode-diff-viewer",
 	"scripts": {

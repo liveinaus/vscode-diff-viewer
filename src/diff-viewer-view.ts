@@ -11,6 +11,7 @@ let webviewPanel: vscode.WebviewPanel | undefined;
 let webviewView: vscode.WebviewView | undefined;
 let data: Types.DiffViewerData = {};
 let lastUserCustomCmd: string;
+let lastActiveFilePath: string | undefined;
 export const componentCode: string = "diffViewer";
 
 export function activate(context: vscode.ExtensionContext) {
@@ -27,10 +28,16 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.commands.registerCommand("better-diff-viewer.viewGitDiffForFile", viewGitDiffForFile),
 		vscode.commands.registerCommand("better-diff-viewer.viewCustomDiffFromCmd", viewCustomDiffFromCmd),
 		vscode.commands.registerCommand("better-diff-viewer.viewChangesInCommit", viewChangesInCommit),
-		vscode.commands.registerCommand("better-diff-viewer.viewChangesBetweenCommits", viewChangesBetweenCommits)
+		vscode.commands.registerCommand("better-diff-viewer.viewChangesBetweenCommits", viewChangesBetweenCommits),
+		vscode.commands.registerCommand("better-diff-viewer.toggleFileDiff", toggleFileDiff)
 	);
 	vscode.workspace.onDidSaveTextDocument(autoRefresh);
 	vscode.workspace.onDidOpenTextDocument(actionWhenFileExtensionDetected);
+	vscode.window.onDidChangeActiveTextEditor((editor) => {
+		if (editor) {
+			lastActiveFilePath = editor.document.uri.fsPath;
+		}
+	});
 
 	context.subscriptions.push(vscode.window.registerWebviewViewProvider(DiffViewerProvider.viewType, provider));
 }
@@ -383,6 +390,22 @@ function revertHunk(relativePath: string, hunkHeader: string, fileChangeState: T
 	} else {
 		revertAction(fileDiff.getUsableHunkDiffByHunkHeader(hunkHeader), "hunk", withWarning, `Hunk Header: ${hunkHeader}`);
 	}
+}
+
+function toggleFileDiff() {
+	if (data.viewMode === "file" && webviewPanel) {
+		webviewPanel.dispose();
+		return;
+	}
+	const filePath = vscode.window.activeTextEditor?.document.uri.fsPath ?? lastActiveFilePath;
+	if (!filePath) {
+		vscode.window.showWarningMessage("No active file to view diff for.");
+		return;
+	}
+	prepareViewerWebview();
+	updateDataByCmd(utils.viewGitDiffByPath(filePath));
+	data.viewMode = "file";
+	doAction("showDiffContent", data);
 }
 
 async function showLog(relativePath: string) {
