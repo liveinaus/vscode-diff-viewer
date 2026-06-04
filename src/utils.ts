@@ -31,6 +31,10 @@ export function viewGitDiffForRepo(): string {
 	return `git add -N --no-all ${filePath}; git diff ${filePath}`;
 }
 
+export function viewStagedDiffForRepo(): string {
+	return `git diff --cached .`;
+}
+
 export function execShell(cmd: string): string {
 	const preCmd = `cd '${repo}';`;
 	try {

@@ -23,6 +23,7 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(
 		vscode.commands.registerCommand("better-diff-viewer.viewDiffFile", viewDiffFile),
 		vscode.commands.registerCommand("better-diff-viewer.viewRepoGitDiff", viewRepoGitDiff),
+		vscode.commands.registerCommand("better-diff-viewer.viewStagedChanges", viewStagedChanges),
 		vscode.commands.registerCommand("better-diff-viewer.viewGitDiffForFile", viewGitDiffForFile),
 		vscode.commands.registerCommand("better-diff-viewer.viewCustomDiffFromCmd", viewCustomDiffFromCmd),
 		vscode.commands.registerCommand("better-diff-viewer.viewChangesInCommit", viewChangesInCommit),
@@ -75,6 +76,7 @@ function viewGitDiffForFile() {
 	const filePath = editor?.document.uri.fsPath;
 	if (filePath) {
 		updateDataByCmd(utils.viewGitDiffByPath(filePath));
+		data.viewMode = "unstaged";
 		doAction("showDiffContent", data);
 	} else {
 		utils.throwError("cannot find file path from current active text editor");
@@ -91,6 +93,7 @@ async function viewCustomDiffFromCmd() {
 	if (customCmd) {
 		prepareViewerWebview();
 		updateDataByCmd(customCmd);
+		data.viewMode = undefined;
 		doAction("showDiffContent", data);
 		lastUserCustomCmd = customCmd;
 	} else {
@@ -107,6 +110,7 @@ async function viewChangesInCommit() {
 	const customCmd = `git diff ${commitHash}~ ${commitHash}`;
 	prepareViewerWebview();
 	updateDataByCmd(customCmd);
+	data.viewMode = undefined;
 	doAction("showDiffContent", data);
 }
 
@@ -131,12 +135,21 @@ async function viewChangesBetweenCommits() {
 	const customCmd = `git diff ${getCommitHash(selectedCommit1)} ${getCommitHash(selectedCommit2)}`;
 	prepareViewerWebview();
 	updateDataByCmd(customCmd);
+	data.viewMode = undefined;
 	doAction("showDiffContent", data);
 }
 
 function viewRepoGitDiff() {
 	prepareViewerWebview();
 	updateDataByCmd(utils.viewGitDiffForRepo());
+	data.viewMode = "unstaged";
+	doAction("showDiffContent", data);
+}
+
+function viewStagedChanges() {
+	prepareViewerWebview();
+	updateDataByCmd(utils.viewStagedDiffForRepo());
+	data.viewMode = "staged";
 	doAction("showDiffContent", data);
 }
 
@@ -153,6 +166,7 @@ function viewDiffFile() {
 function viewDiffDocument(document: vscode.TextDocument) {
 	prepareViewerWebview();
 	updateDataByDiffContent(document.getText());
+	data.viewMode = undefined;
 	doAction("showDiffContent", data);
 }
 
@@ -254,6 +268,8 @@ function handleMessageFromWebview(message: any) {
 		setShowCmd(message.showCmd);
 	} else if (message.command === "gitAdd") {
 		gitAdd(message.relativeFilePath, message.fileChangeState as Types.FileChangeState);
+	} else if (message.command === "gitUnstage") {
+		gitUnstage(message.relativeFilePath, message.fileChangeState as Types.FileChangeState);
 	}
 }
 
@@ -362,6 +378,18 @@ function revertHunk(relativePath: string, hunkHeader: string, fileChangeState: T
 	} else {
 		revertAction(fileDiff.getUsableHunkDiffByHunkHeader(hunkHeader), "hunk", withWarning, `Hunk Header: ${hunkHeader}`);
 	}
+}
+
+function gitUnstage(relativePath: string, fileChangeState: Types.FileChangeState) {
+	let cmd: string;
+	if (fileChangeState === "MOVED") {
+		const [pathA, pathB] = getFilepathsForMovedAction(relativePath);
+		cmd = `git restore --staged -- '${utils.getAbsolutePath(pathA)}' '${utils.getAbsolutePath(pathB)}'`;
+	} else {
+		cmd = `git restore --staged -- '${utils.getAbsolutePath(relativePath)}'`;
+	}
+	utils.execShell(cmd);
+	refresh(true);
 }
 
 function gitAdd(relativePath: string, fileChangeState: Types.FileChangeState) {

@@ -154,16 +154,22 @@ function refresh(isForced = false) {
 }
 
 function addUiElementsToDiff2HtmlUi(config) {
+	const isStagedView = data.viewMode === "staged";
+
 	jQuery(".d2h-file-name-wrapper").each(function () {
 		const relativeFilePath = jQuery(this).find(".d2h-file-name").html();
 		const fileChangeState = getFileChangeState(this);
 		addCustomGitBtn({ selector: this, action: "openFile", title: "Open File", relativeFilePath: relativeFilePath, fileChangeState: fileChangeState, iconClass: "fa-solid fa-folder-open", shortDesc: "O", longDesc: "Open" });
 		addCustomGitBtn({ selector: this, action: "copyFilePath", title: "Copy File Path", relativeFilePath: relativeFilePath, fileChangeState: fileChangeState, iconClass: "fa-solid fa-copy", shortDesc: "C", longDesc: "Copy" });
-		addCustomGitBtn({ selector: this, action: "gitAdd", title: "Stage File", relativeFilePath: relativeFilePath, fileChangeState: fileChangeState, iconClass: "fa-solid fa-plus", shortDesc: "A", longDesc: "Add", isDisabledAfterClicked: true });
-		addCustomGitBtn({ selector: this, btnClass: "custom-git-danger-btn", action: "revertFile", title: "Revert File", relativeFilePath: relativeFilePath, fileChangeState: fileChangeState, iconClass: "fa-solid fa-rotate-left", shortDesc: "R", longDesc: "Revert" });
+		if (isStagedView) {
+			addCustomGitBtn({ selector: this, action: "gitUnstage", title: "Remove from Staged", relativeFilePath: relativeFilePath, fileChangeState: fileChangeState, iconClass: "fa-solid fa-minus", shortDesc: "R", longDesc: "Remove", isDisabledAfterClicked: true });
+		} else {
+			addCustomGitBtn({ selector: this, action: "gitAdd", title: "Stage File", relativeFilePath: relativeFilePath, fileChangeState: fileChangeState, iconClass: "fa-solid fa-plus", shortDesc: "A", longDesc: "Add", isDisabledAfterClicked: true });
+			addCustomGitBtn({ selector: this, btnClass: "custom-git-danger-btn", action: "revertFile", title: "Revert File", relativeFilePath: relativeFilePath, fileChangeState: fileChangeState, iconClass: "fa-solid fa-rotate-left", shortDesc: "R", longDesc: "Revert" });
+		}
 	});
 
-	if (config && config.enableRevertHunk) {
+	if (!isStagedView && config && config.enableRevertHunk) {
 		jQuery(".d2h-info .d2h-code-line")
 			.filter(function () {
 				return jQuery(this).html() && jQuery(this).html().trim() !== "File without changes";

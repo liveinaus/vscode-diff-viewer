@@ -56,6 +56,10 @@
 				"title": "Better-diff-viewer: View Uncommitted Changes"
 			},
 			{
+				"command": "better-diff-viewer.viewStagedChanges",
+				"title": "Better-diff-viewer: View Changes to be Committed"
+			},
+			{
 				"command": "better-diff-viewer.viewGitDiffForFile",
 				"title": "Better-diff-viewer: View Git Diff for current file"
 			},
