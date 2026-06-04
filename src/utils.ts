@@ -94,7 +94,7 @@ export function sanitizeDiffContent(content: string, maxLinesPerFile: number): s
 
 	return sections
 		.map(section => {
-			if (!section.trim()) return section;
+			if (!section.trim()) { return section; }
 
 			// Replace GIT binary patch data with a standard "Binary files differ" line
 			if (/^GIT binary patch/m.test(section)) {

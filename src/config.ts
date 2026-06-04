@@ -75,19 +75,19 @@ function getArrayUserConfig(key: string): string[] | undefined {
 
 function getBooleanUserConfig(key: string): boolean | undefined {
 	const val = userConfig.get(key);
-	if (val === undefined) return undefined;
+	if (val === undefined) { return undefined; }
 	return val === "true" || val === true;
 }
 
 function getNumberUserConfig(key: string): number | undefined {
 	const val = userConfig.get(key);
-	if (val === undefined) return undefined;
+	if (val === undefined) { return undefined; }
 	return Number(val);
 }
 
 function getStringUserConfig(key: string): string | undefined {
 	const val = userConfig.get(key);
-	if (val === undefined) return undefined;
+	if (val === undefined) { return undefined; }
 	return String(val);
 }
 
