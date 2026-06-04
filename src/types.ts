@@ -22,6 +22,7 @@ export type BetterDiffViewerOptions = {
 	showCmd?: boolean;
 	zoomNum?: number;
 	showRevertFileWarning?: boolean;
+	maxDiffLinesPerFile?: number;
 	componentsDisplayAtEditor?: string[];
 	componentsDisplayAtPanel?: string[];
 	"diff2html-ui": {};

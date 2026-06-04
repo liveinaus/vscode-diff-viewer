@@ -35,6 +35,17 @@
 				}
 			]
 		},
+		"configuration": {
+			"title": "Better Diff Viewer",
+			"properties": {
+				"better-diff-viewer.maxDiffLinesPerFile": {
+					"type": "number",
+					"default": 3000,
+					"minimum": 100,
+					"description": "Maximum lines shown per file in the diff view. Files exceeding this limit are truncated. Binary patch data is always excluded regardless of this setting."
+				}
+			}
+		},
 		"commands": [
 			{
 				"command": "better-diff-viewer.viewDiffFile",

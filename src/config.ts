@@ -45,6 +45,7 @@ export function getAppConfig(): Types.BetterDiffViewerOptions {
 		showCmd: true,
 		zoomNum: 0.9,
 		showRevertFileWarning: true,
+		maxDiffLinesPerFile: 3000,
 		componentsDisplayAtEditor: [diffViewerView.componentCode],
 		componentsDisplayAtPanel: [],
 	};
@@ -60,6 +61,7 @@ export function getAppConfig(): Types.BetterDiffViewerOptions {
 		showCmd: getBooleanUserConfig("showCmd"),
 		zoomNum: getNumberUserConfig("zoomNum"),
 		showRevertFileWarning: getBooleanUserConfig("showRevertFileWarning"),
+		maxDiffLinesPerFile: getNumberUserConfig("maxDiffLinesPerFile"),
 		componentsDisplayAtEditor: getArrayUserConfig("componentsDisplayAtEditor"),
 		componentsDisplayAtPanel: getArrayUserConfig("componentsDisplayAtPanel"),
 	};

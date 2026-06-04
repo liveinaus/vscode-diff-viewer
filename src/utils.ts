@@ -82,3 +82,33 @@ export function initUtils(context: vscode.ExtensionContext) {
 	extensionPath = context.extensionPath;
 	clearTempFolder();
 }
+
+// Strips raw binary patch data and truncates oversized file sections so the
+// renderer doesn't choke on large or binary diffs.
+export function sanitizeDiffContent(content: string, maxLinesPerFile: number): string {
+	const sections = content.split(/(?=^diff --git )/m);
+
+	return sections
+		.map(section => {
+			if (!section.trim()) return section;
+
+			// Replace GIT binary patch data with a standard "Binary files differ" line
+			if (/^GIT binary patch/m.test(section)) {
+				const headerMatch = /diff --git a\/(.+?) b\/(.+)/.exec(section);
+				const header = section.split(/^GIT binary patch/m)[0].trimEnd();
+				if (headerMatch) {
+					return `${header}\nBinary files a/${headerMatch[1]} and b/${headerMatch[2]} differ\n`;
+				}
+				return '';
+			}
+
+			// Truncate file sections that exceed the line limit
+			const lines = section.split('\n');
+			if (lines.length > maxLinesPerFile) {
+				return lines.slice(0, maxLinesPerFile).join('\n') + '\n';
+			}
+
+			return section;
+		})
+		.join('');
+}

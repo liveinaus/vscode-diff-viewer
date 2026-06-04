@@ -59,14 +59,14 @@ function actionWhenFileExtensionDetected(document: vscode.TextDocument) {
 
 function updateDataByDiffContent(diffContent: string) {
 	data.cmd = undefined;
-	data.diffContent = diffContent;
 	updateDataForConfig();
+	data.diffContent = utils.sanitizeDiffContent(diffContent, data.config?.maxDiffLinesPerFile ?? 3000);
 }
 
 function updateDataByCmd(cmd: string) {
 	data.cmd = cmd;
-	data.diffContent = utils.execShell(cmd);
 	updateDataForConfig();
+	data.diffContent = utils.sanitizeDiffContent(utils.execShell(cmd), data.config?.maxDiffLinesPerFile ?? 3000);
 }
 
 function viewGitDiffForFile() {
