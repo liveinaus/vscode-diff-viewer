@@ -177,16 +177,25 @@ function viewDiffDocument(document: vscode.TextDocument) {
 	doAction("showDiffContent", data);
 }
 
+function getTargetViewColumn(): vscode.ViewColumn {
+	const groups = vscode.window.tabGroups.all;
+	// Use the highest-numbered column (rightmost split) if more than one exists, otherwise create a new split
+	if (groups.length > 1) {
+		return Math.max(...groups.map(g => g.viewColumn)) as vscode.ViewColumn;
+	}
+	return vscode.ViewColumn.Beside;
+}
+
 function prepareViewerWebview() {
 	if (config.getAppConfig().componentsDisplayAtEditor?.includes(componentCode)) {
 		if (!webviewPanel) {
-			webviewPanel = vscode.window.createWebviewPanel("diffViewer", "Diff Viewer", { viewColumn: vscode.ViewColumn.Beside, preserveFocus: true }, { enableScripts: true, enableFindWidget: true });
+			webviewPanel = vscode.window.createWebviewPanel("diffViewer", "Diff Viewer", { viewColumn: getTargetViewColumn(), preserveFocus: true }, { enableScripts: true, enableFindWidget: true });
 			webviewPanel.onDidDispose(() => {
 				webviewPanel = undefined;
 			});
 			prepareWebviewInner(webviewPanel.webview);
 		} else {
-			webviewPanel.reveal(vscode.ViewColumn.Beside, true);
+			webviewPanel.reveal(getTargetViewColumn(), true);
 		}
 	} else {
 		webviewPanel = undefined;

@@ -13,5 +13,21 @@
 	"better-diff-viewer.isAutoRefresh": true,
 	"better-diff-viewer.showBtnIcon": true,
 	"better-diff-viewer.showBtnLongDesc": true,
-	"better-diff-viewer.showBtnShortDesc": false
+	"better-diff-viewer.showBtnShortDesc": false,
+	"workbench.colorCustomizations": {
+		"titleBar.activeBackground": "#3513f8",
+		"tab.activeBorder": "#ff0000",
+		"tab.activeBorderTop": "#ff0000",
+		"tab.activeBackground": "#4c00ff",
+		"tab.unfocusedActiveBackground": "#03000aa2",
+		"activityBar.background": "#540754",
+		"titleBar.inactiveBackground": "#540754",
+		"titleBar.inactiveForeground": "#FFF9FF",
+		"statusBar.background": "#540754",
+		"statusBar.foreground": "#FFF9FF",
+		"statusBar.debuggingBackground": "#540754",
+		"statusBar.debuggingForeground": "#FFF9FF",
+		"statusBar.noFolderBackground": "#540754",
+		"statusBar.noFolderForeground": "#FFF9FF"
+	}
 }
