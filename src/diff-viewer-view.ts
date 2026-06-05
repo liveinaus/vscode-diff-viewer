@@ -239,6 +239,10 @@ function prepareWebviewInner(webview: vscode.Webview, overwriteHtml?: string) {
                 <button id="show-cmd-btn">Show CMD</button><button id="hide-cmd-btn">Hide CMD</button>
                 <span class="btn-group"><button id="zoom-in-btn"><i class="fa-solid fa-plus"></i></button>
                 <button id="zoom-out-btn"><i class="fa-solid fa-minus"></i></button></span>
+                <span id="file-filter-wrap">
+                  <input id="file-filter-input" type="text" placeholder="Filter files..." autocomplete="off" spellcheck="false" />
+                  <div id="file-filter-dropdown"></div>
+                </span>
               </div>
               <div id="diff2html-container"></div>
               <div id="diff2html-footer">

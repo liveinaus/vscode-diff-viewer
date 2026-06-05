@@ -43,6 +43,33 @@ function addButtonListeners() {
 	jQuery("#diff-mode-select").on("change", function () {
 		vscode.postMessage({ command: "switchDiffMode", viewMode: this.value });
 	});
+
+	jQuery("#file-filter-input")
+		.on("input", function () {
+			const val = this.value.trim();
+			applyFileFilter(val);
+			showFileFilterDropdown(val);
+		})
+		.on("focus", function () {
+			showFileFilterDropdown(this.value.trim());
+		})
+		.on("keydown", function (e) {
+			if (e.key === "Escape") {
+				jQuery("#file-filter-dropdown").hide();
+				this.blur();
+			}
+		})
+		.on("blur", function () {
+			// Delay lets a dropdown item click register before hiding
+			setTimeout(() => jQuery("#file-filter-dropdown").hide(), 150);
+		});
+
+	jQuery("#file-filter-dropdown").on("click", ".file-filter-option", function () {
+		const val = jQuery(this).data("value");
+		jQuery("#file-filter-input").val(val);
+		applyFileFilter(val);
+		jQuery("#file-filter-dropdown").hide();
+	});
 }
 
 function setShowCmd(showCmd) {
@@ -131,6 +158,7 @@ function showDiff2HtmlUi() {
 	}
 
 	addUiElementsToDiff2HtmlUi(config);
+	applyFileFilter(jQuery("#file-filter-input").val().trim());
 	jQuery(".custom-git-btn .btn-icon").toggle(config.showBtnIcon);
 	jQuery(".custom-git-btn .btn-long-desc").toggle(config.showBtnLongDesc);
 	jQuery(".custom-git-btn .btn-short-desc").toggle(config.showBtnShortDesc);
@@ -254,6 +282,50 @@ function addCustomGitBtn(options) {
 	jQuery(selector).append(
 		`<button class="custom-git-btn ${btnClass}" title="${title}" ${actionStr} ${relativeFilePathStr} ${fileChangeStateStr} ${hunkHeaderStr} ${isDisabledAfterClickedStr}><span class="btn-icon"><i class="${iconClass}"></i></span><span class="btn-short-desc">${shortDesc}</span><span class="btn-long-desc">${longDesc}</span></button>`
 	);
+}
+
+function applyFileFilter(filterText) {
+	const lower = filterText.toLowerCase();
+	jQuery(".d2h-file-wrapper").each(function () {
+		const fileName = jQuery(this).find(".d2h-file-name").text().toLowerCase();
+		jQuery(this).toggle(!lower || fileName.includes(lower));
+	});
+}
+
+function showFileFilterDropdown(filterText) {
+	const lower = filterText.toLowerCase();
+	const $dropdown = jQuery("#file-filter-dropdown");
+	$dropdown.empty();
+
+	const files = [];
+	jQuery(".d2h-file-wrapper").each(function () {
+		const name = jQuery(this).find(".d2h-file-name").first().text().trim();
+		if (name) files.push(name);
+	});
+
+	const matching = lower ? files.filter(f => f.toLowerCase().includes(lower)) : files;
+
+	if (!matching.length) {
+		$dropdown.hide();
+		return;
+	}
+
+	matching.forEach(file => {
+		const $item = jQuery('<div class="file-filter-option"></div>').data("value", file);
+		if (lower) {
+			// Highlight match using safe DOM methods (no HTML injection)
+			const idx = file.toLowerCase().indexOf(lower);
+			$item
+				.append(document.createTextNode(file.slice(0, idx)))
+				.append(jQuery('<mark></mark>').text(file.slice(idx, idx + lower.length)))
+				.append(document.createTextNode(file.slice(idx + lower.length)));
+		} else {
+			$item.text(file);
+		}
+		$dropdown.append($item);
+	});
+
+	$dropdown.show();
 }
 
 function addDataElement(elementProp, data) {

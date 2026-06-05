@@ -7,6 +7,15 @@ export let extensionPath: string;
 
 const tempFolderName = "temp";
 const repo: string = getRepoPath();
+const gitRoot: string = resolveGitRoot(repo);
+
+function resolveGitRoot(fromPath: string): string {
+	try {
+		return cp.execSync('git rev-parse --show-toplevel', { cwd: fromPath, encoding: 'utf8' }).trim();
+	} catch {
+		return fromPath;
+	}
+}
 
 export function viewDiffInFile(fromHash: string, toHash: string, oldFilePath: string, newFilePath: string): string {
 	if (fromHash === UNCOMMITTED) {
@@ -60,7 +69,7 @@ export function throwError(message: string): never {
 }
 
 export function getAbsolutePath(relativePath: string) {
-	return path.join(getRepoPath(), relativePath);
+	return path.join(gitRoot, relativePath);
 }
 
 export function createTempFile(filename: string, fileContent: string) {

@@ -50,6 +50,79 @@
 	align-self: stretch;
 }
 
+#file-filter-wrap {
+	position: relative;
+	margin-left: auto;
+	display: flex;
+	align-items: stretch;
+}
+
+#file-filter-input {
+	padding: 2px 6px;
+	width: 200px;
+	box-sizing: border-box;
+}
+
+#file-filter-dropdown {
+	display: none;
+	position: absolute;
+	top: 100%;
+	right: 0;
+	min-width: 100%;
+	max-height: 300px;
+	overflow-y: auto;
+	background: white;
+	border: 1px solid #ccc;
+	border-top: none;
+	box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+	z-index: 1000;
+}
+
+.file-filter-option {
+	padding: 4px 8px;
+	cursor: pointer;
+	white-space: nowrap;
+	font-size: 13px;
+	color: #111;
+}
+
+.file-filter-option:hover {
+	background: #e8f0fe;
+}
+
+.file-filter-option mark {
+	background: #fff3cd;
+	padding: 0;
+}
+
+.bdv-cs-dark #file-filter-input {
+	background-color: #333;
+	color: #fff;
+	border-color: #555;
+}
+
+.bdv-cs-dark #file-filter-input::placeholder {
+	color: #aaa;
+}
+
+.bdv-cs-dark #file-filter-dropdown {
+	background: #2d2d2d;
+	border-color: #555;
+}
+
+.bdv-cs-dark .file-filter-option {
+	color: #eee;
+}
+
+.bdv-cs-dark .file-filter-option:hover {
+	background: #404040;
+}
+
+.bdv-cs-dark .file-filter-option mark {
+	background: #5a4a00;
+	color: #ffd;
+}
+
 
 .custom-git-btn {
 	display: flex;
