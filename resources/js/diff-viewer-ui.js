@@ -1,7 +1,11 @@
 const vscode = acquireVsCodeApi();
 const diff2htmlContainerId = "#diff2html-container";
+const GIT_LOG_PAGE_SIZE = 20;
 let diff2htmlUi;
 let data = {};
+let gitLogOffset = 0;
+let gitLogHasMore = true;
+let gitLogLoading = false;
 
 window.addEventListener("message", (event) => {
 	const uiMessage = event.data;
@@ -10,6 +14,8 @@ window.addEventListener("message", (event) => {
 			data = uiMessage?.data;
 			showDiff2HtmlUi();
 		}
+	} else if (uiMessage.command === "showGitLog") {
+		renderGitLog(uiMessage.data?.commits ?? [], uiMessage.data?.offset ?? 0, uiMessage.data?.hasMore ?? false);
 	}
 });
 
@@ -69,6 +75,19 @@ function addButtonListeners() {
 		jQuery("#file-filter-input").val(val);
 		applyFileFilter(val);
 		jQuery("#file-filter-dropdown").hide();
+	});
+
+	jQuery("#git-log-toggle-btn").on("click", toggleGitLog);
+	jQuery("#git-log-refresh-btn").on("click", () => loadGitLog(0));
+	jQuery("#git-log-list").on("scroll", function () {
+		if (!gitLogLoading && gitLogHasMore && this.scrollTop + this.clientHeight >= this.scrollHeight - 80) {
+			loadGitLog(gitLogOffset);
+		}
+	});
+	jQuery("#git-log-list").on("click", ".git-log-commit", function () {
+		jQuery(".git-log-commit.active").removeClass("active");
+		jQuery(this).addClass("active");
+		vscode.postMessage({ command: "viewCommitFromLog", hash: jQuery(this).data("hash") });
 	});
 }
 
@@ -230,31 +249,27 @@ function addUiElementsToDiff2HtmlUi(config) {
 		}
 	});
 
-	if (!isStagedView && config?.enableRevertHunk) {
-		jQuery(".d2h-info .d2h-code-line")
-			.filter(function () {
-				return jQuery(this).html() && jQuery(this).html().trim() !== "File without changes";
-			})
-			.each(function () {
-				const jContainer = jQuery(this).closest(".d2h-info");
-				const jFileWrapper = jQuery(this).closest(".d2h-file-wrapper");
-				const relativeFilePath = jFileWrapper.find(".d2h-file-name").html();
-				const hunkHeader = jQuery(this).html().trim();
-				const fileChangeState = getFileChangeState(jFileWrapper);
-				addCustomGitBtn({
-					selector: jContainer,
-					btnClass: "custom-git-danger-btn",
-					action: "revertHunk",
-					title: "Revert Hunk",
-					relativeFilePath: relativeFilePath,
-					fileChangeState: fileChangeState,
-					iconClass: "fa-solid fa-rotate-left",
-					shortDesc: "R",
-					longDesc: "Revert",
-					hunkHeader: hunkHeader,
-				});
-			});
-	}
+	jQuery(".d2h-info .d2h-code-line")
+		.filter(function () {
+			return jQuery(this).html() && jQuery(this).html().trim() !== "File without changes";
+		})
+		.each(function () {
+			const jFileWrapper = jQuery(this).closest(".d2h-file-wrapper");
+			const relativeFilePath = jFileWrapper.find(".d2h-file-name").html();
+			const hunkHeader = jQuery(this).html().trim();
+			const fileChangeState = getFileChangeState(jFileWrapper);
+			const base = { selector: jQuery(this), prepend: true, relativeFilePath, fileChangeState, hunkHeader };
+
+			if (isStagedView) {
+				addCustomGitBtn({ ...base, action: "unstageHunk", title: "Unstage Hunk", iconClass: "fa-solid fa-minus", shortDesc: "R", longDesc: "Remove", isDisabledAfterClicked: true });
+			} else {
+				// Prepend Add first so Revert ends up before it after the second prepend
+				addCustomGitBtn({ ...base, action: "stageHunk", title: "Stage Hunk", iconClass: "fa-solid fa-plus", shortDesc: "A", longDesc: "Add", isDisabledAfterClicked: true });
+				if (config?.enableRevertHunk) {
+					addCustomGitBtn({ ...base, btnClass: "custom-git-danger-btn", action: "revertHunk", title: "Revert Hunk", iconClass: "fa-solid fa-rotate-left", shortDesc: "R", longDesc: "Revert" });
+				}
+			}
+		});
 }
 
 function getFileChangeState(selector) {
@@ -272,16 +287,19 @@ function getFileChangeState(selector) {
 }
 
 function addCustomGitBtn(options) {
-	const { selector, action, title, relativeFilePath, fileChangeState, iconClass, shortDesc, longDesc, btnClass, hunkHeader, isDisabledAfterClicked } = options;
+	const { selector, action, title, relativeFilePath, fileChangeState, iconClass, shortDesc, longDesc, btnClass, hunkHeader, isDisabledAfterClicked, prepend } = options;
 	const hunkHeaderStr = addDataElement("hunk-header", hunkHeader);
 	const isDisabledAfterClickedStr = addDataElement("is-disabled-after-clicked", isDisabledAfterClicked);
 	const actionStr = addDataElement("command", action);
 	const fileChangeStateStr = addDataElement("file-change-state", fileChangeState);
 	const relativeFilePathStr = addDataElement("relative-file-path", relativeFilePath);
 
-	jQuery(selector).append(
-		`<button class="custom-git-btn ${btnClass}" title="${title}" ${actionStr} ${relativeFilePathStr} ${fileChangeStateStr} ${hunkHeaderStr} ${isDisabledAfterClickedStr}><span class="btn-icon"><i class="${iconClass}"></i></span><span class="btn-short-desc">${shortDesc}</span><span class="btn-long-desc">${longDesc}</span></button>`
-	);
+	const html = `<button class="custom-git-btn ${btnClass}" title="${title}" ${actionStr} ${relativeFilePathStr} ${fileChangeStateStr} ${hunkHeaderStr} ${isDisabledAfterClickedStr}><span class="btn-icon"><i class="${iconClass}"></i></span><span class="btn-short-desc">${shortDesc}</span><span class="btn-long-desc">${longDesc}</span></button>`;
+	if (prepend) {
+		jQuery(selector).prepend(html);
+	} else {
+		jQuery(selector).append(html);
+	}
 }
 
 function applyFileFilter(filterText) {
@@ -326,6 +344,85 @@ function showFileFilterDropdown(filterText) {
 	});
 
 	$dropdown.show();
+}
+
+function toggleGitLog() {
+	const $panel = jQuery("#git-log-panel");
+	const isVisible = $panel.hasClass("visible");
+	if (isVisible) {
+		$panel.removeClass("visible");
+	} else {
+		$panel.addClass("visible");
+		// Load on first open; subsequent toggles reuse cached list
+		if (!jQuery("#git-log-list .git-log-commit").length) {
+			loadGitLog(0);
+		}
+	}
+}
+
+function loadGitLog(offset = 0) {
+	gitLogLoading = true;
+	const $list = jQuery("#git-log-list");
+	if (offset === 0) {
+		gitLogOffset = 0;
+		gitLogHasMore = true;
+		$list.html('<div class="git-log-loading">Loading...</div>');
+	} else {
+		$list.find(".git-log-loading-more").remove();
+		$list.append('<div class="git-log-loading git-log-loading-more">Loading more...</div>');
+	}
+	vscode.postMessage({ command: "loadGitLog", offset, limit: GIT_LOG_PAGE_SIZE });
+}
+
+function renderGitLog(commits, offset, hasMore) {
+	gitLogLoading = false;
+	gitLogHasMore = hasMore;
+	gitLogOffset = offset + commits.length;
+
+	const $list = jQuery("#git-log-list");
+	$list.find(".git-log-loading").remove();
+
+	if (offset === 0 && !commits.length) {
+		$list.html('<div class="git-log-empty">No commits found.</div>');
+		return;
+	}
+
+	commits.forEach(commit => {
+		const $item = jQuery('<div class="git-log-commit"></div>')
+			.data("hash", commit.hash);
+
+		if (commit.refs.length) {
+			const $refs = jQuery('<div class="git-log-refs"></div>');
+			commit.refs.forEach(ref => {
+				const $badge = jQuery('<span class="git-log-ref"></span>');
+				if (ref === "HEAD") {
+					$badge.addClass("git-log-ref-head").text("HEAD");
+				} else if (ref.startsWith("HEAD -> ")) {
+					$badge.addClass("git-log-ref-head").text(ref.slice(8));
+				} else if (ref.startsWith("tag: ")) {
+					$badge.addClass("git-log-ref-tag").text(ref.slice(5));
+				} else if (ref.includes("/")) {
+					$badge.addClass("git-log-ref-remote").text(ref);
+				} else {
+					$badge.addClass("git-log-ref-branch").text(ref);
+				}
+				$refs.append($badge);
+			});
+			$item.append($refs);
+		}
+
+		$item.append(
+			jQuery('<div class="git-log-subject"></div>')
+				.append(jQuery('<span class="git-log-hash"></span>').text(commit.shortHash + " "))
+				.append(document.createTextNode(commit.subject))
+		);
+
+		$item.append(
+			jQuery('<div class="git-log-meta"></div>').text(`${commit.author} · ${commit.relativeTime}`)
+		);
+
+		$list.append($item);
+	});
 }
 
 function addDataElement(elementProp, data) {

@@ -5,7 +5,7 @@
 	"icon": "images/extension-icon.png",
 	"publisher": "SamWang",
 	"author": "Sam Wang",
-	"version": "1.1.0",
+	"version": "1.1.1",
 	"engines": {
 		"vscode": "^1.120.0"
 	},
