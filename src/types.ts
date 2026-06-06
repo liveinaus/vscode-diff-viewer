@@ -30,3 +30,13 @@ export type BetterDiffViewerOptions = {
 };
 
 export type FileChangeState = "ADDED" | "MOVED" | "CHANGED" | "DELETED" | "UNKNOWN";
+
+export type GitCommit = {
+	hash: string;
+	shortHash: string;
+	parentHashes: string[];
+	subject: string;
+	author: string;
+	relativeTime: string;
+	refs: string[];
+};

@@ -1,3 +1,172 @@
+/* Layout */
+#main-container {
+	display: flex;
+	align-items: flex-start;
+}
+
+#git-log-panel {
+	display: none;
+	flex-direction: column;
+	position: sticky;
+	top: 0;
+	height: 100vh;
+	width: 280px;
+	min-width: 200px;
+	flex-shrink: 0;
+	border-right: 1px solid #ccc;
+	overflow: hidden;
+}
+
+#git-log-panel.visible {
+	display: flex;
+}
+
+#git-log-panel-header {
+	display: flex;
+	align-items: center;
+	padding: 4px 8px;
+	border-bottom: 1px solid #ccc;
+	font-weight: bold;
+	font-size: 13px;
+	flex-shrink: 0;
+}
+
+#git-log-panel-header span {
+	flex: 1;
+}
+
+#git-log-panel-header button {
+	background: none;
+	border: none;
+	cursor: pointer;
+	padding: 2px 4px;
+}
+
+#git-log-list {
+	flex: 1;
+	overflow-y: auto;
+}
+
+#diff-view-area {
+	flex: 1;
+	min-width: 0;
+}
+
+.git-log-commit {
+	padding: 6px 8px;
+	border-bottom: 1px solid #eee;
+	cursor: pointer;
+	font-size: 12px;
+}
+
+.git-log-commit:hover {
+	background: #f0f4ff;
+}
+
+.git-log-commit.active {
+	background: #e3edff;
+	border-left: 3px solid #4a90e2;
+	padding-left: 5px;
+}
+
+.git-log-hash {
+	font-family: monospace;
+	color: #c44;
+	font-size: 11px;
+}
+
+.git-log-subject {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	font-size: 12px;
+	margin-top: 2px;
+}
+
+.git-log-meta {
+	font-size: 11px;
+	color: #888;
+	margin-top: 2px;
+}
+
+.git-log-refs {
+	margin-bottom: 2px;
+}
+
+.git-log-ref {
+	display: inline-block;
+	font-size: 10px;
+	padding: 1px 4px;
+	border-radius: 3px;
+	margin-right: 3px;
+	font-weight: bold;
+}
+
+.git-log-ref-head {
+	background: #7c3aed;
+	color: white;
+}
+
+.git-log-ref-branch {
+	background: #16a34a;
+	color: white;
+}
+
+.git-log-ref-tag {
+	background: #ca8a04;
+	color: white;
+}
+
+.git-log-ref-remote {
+	background: #2563eb;
+	color: white;
+}
+
+.git-log-loading,
+.git-log-empty {
+	padding: 8px;
+	color: #888;
+	font-size: 12px;
+}
+
+/* Dark mode for git log */
+.bdv-cs-dark #git-log-panel {
+	border-right-color: #555;
+}
+
+.bdv-cs-dark #git-log-panel-header {
+	border-bottom-color: #555;
+}
+
+.bdv-cs-dark #git-log-panel-header button {
+	color: #fff;
+}
+
+.bdv-cs-dark #git-log-panel-header button:hover {
+	background: #444;
+}
+
+.bdv-cs-dark .git-log-commit {
+	border-bottom-color: #444;
+}
+
+.bdv-cs-dark .git-log-commit:hover {
+	background: #2a2a3a;
+}
+
+.bdv-cs-dark .git-log-commit.active {
+	background: #1a2a4a;
+	border-left-color: #4a90e2;
+}
+
+.bdv-cs-dark .git-log-hash {
+	color: #f88;
+}
+
+.bdv-cs-dark .git-log-meta {
+	color: #999;
+}
+
 /* Color CSS */
 #diff2html-container {
 	background: white;
@@ -50,6 +219,79 @@
 	align-self: stretch;
 }
 
+#file-filter-wrap {
+	position: relative;
+	margin-left: auto;
+	display: flex;
+	align-items: stretch;
+}
+
+#file-filter-input {
+	padding: 2px 6px;
+	width: 200px;
+	box-sizing: border-box;
+}
+
+#file-filter-dropdown {
+	display: none;
+	position: absolute;
+	top: 100%;
+	right: 0;
+	min-width: 100%;
+	max-height: 300px;
+	overflow-y: auto;
+	background: white;
+	border: 1px solid #ccc;
+	border-top: none;
+	box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+	z-index: 1000;
+}
+
+.file-filter-option {
+	padding: 4px 8px;
+	cursor: pointer;
+	white-space: nowrap;
+	font-size: 13px;
+	color: #111;
+}
+
+.file-filter-option:hover {
+	background: #e8f0fe;
+}
+
+.file-filter-option mark {
+	background: #fff3cd;
+	padding: 0;
+}
+
+.bdv-cs-dark #file-filter-input {
+	background-color: #333;
+	color: #fff;
+	border-color: #555;
+}
+
+.bdv-cs-dark #file-filter-input::placeholder {
+	color: #aaa;
+}
+
+.bdv-cs-dark #file-filter-dropdown {
+	background: #2d2d2d;
+	border-color: #555;
+}
+
+.bdv-cs-dark .file-filter-option {
+	color: #eee;
+}
+
+.bdv-cs-dark .file-filter-option:hover {
+	background: #404040;
+}
+
+.bdv-cs-dark .file-filter-option mark {
+	background: #5a4a00;
+	color: #ffd;
+}
+
 
 .custom-git-btn {
 	display: flex;
@@ -89,9 +331,10 @@
 }
 
 .d2h-info .custom-git-btn {
-	position: absolute;
+	display: inline-flex;
 	height: 16px;
 	line-height: 12px;
 	font-size: 10px;
-	left: 35px;
+	vertical-align: middle;
+	margin-right: 6px;
 }

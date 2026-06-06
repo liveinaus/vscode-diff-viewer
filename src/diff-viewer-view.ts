@@ -177,16 +177,25 @@ function viewDiffDocument(document: vscode.TextDocument) {
 	doAction("showDiffContent", data);
 }
 
+function getTargetViewColumn(): vscode.ViewColumn {
+	const groups = vscode.window.tabGroups.all;
+	// Use the highest-numbered column (rightmost split) if more than one exists, otherwise create a new split
+	if (groups.length > 1) {
+		return Math.max(...groups.map(g => g.viewColumn)) as vscode.ViewColumn;
+	}
+	return vscode.ViewColumn.Beside;
+}
+
 function prepareViewerWebview() {
 	if (config.getAppConfig().componentsDisplayAtEditor?.includes(componentCode)) {
 		if (!webviewPanel) {
-			webviewPanel = vscode.window.createWebviewPanel("diffViewer", "Diff Viewer", { viewColumn: vscode.ViewColumn.Beside, preserveFocus: true }, { enableScripts: true, enableFindWidget: true });
+			webviewPanel = vscode.window.createWebviewPanel("diffViewer", "Diff Viewer", { viewColumn: getTargetViewColumn(), preserveFocus: true }, { enableScripts: true, enableFindWidget: true });
 			webviewPanel.onDidDispose(() => {
 				webviewPanel = undefined;
 			});
 			prepareWebviewInner(webviewPanel.webview);
 		} else {
-			webviewPanel.reveal(vscode.ViewColumn.Beside, true);
+			webviewPanel.reveal(getTargetViewColumn(), true);
 		}
 	} else {
 		webviewPanel = undefined;
@@ -233,16 +242,30 @@ function prepareWebviewInner(webview: vscode.Webview, overwriteHtml?: string) {
         </head>
         <body id="bdv-body">
             <div id="main-container">
-              <div id="diff2html-header">
-                <button id="refresh-btn">Refresh</button>
-                <select id="diff-mode-select" style="display:none"></select>
-                <button id="show-cmd-btn">Show CMD</button><button id="hide-cmd-btn">Hide CMD</button>
-                <span class="btn-group"><button id="zoom-in-btn"><i class="fa-solid fa-plus"></i></button>
-                <button id="zoom-out-btn"><i class="fa-solid fa-minus"></i></button></span>
+              <div id="git-log-panel">
+                <div id="git-log-panel-header">
+                  <span>Commits</span>
+                  <button id="git-log-refresh-btn" title="Refresh log"><i class="fa-solid fa-rotate"></i></button>
+                </div>
+                <div id="git-log-list"></div>
               </div>
-              <div id="diff2html-container"></div>
-              <div id="diff2html-footer">
-                <div id="cmd-viewer"><span id="cmd-content"></span></div>
+              <div id="diff-view-area">
+                <div id="diff2html-header">
+                  <button id="git-log-toggle-btn" title="Git Log"><i class="fa-solid fa-code-branch"></i></button>
+                  <button id="refresh-btn">Refresh</button>
+                  <select id="diff-mode-select" style="display:none"></select>
+                  <button id="show-cmd-btn">Show CMD</button><button id="hide-cmd-btn">Hide CMD</button>
+                  <span class="btn-group"><button id="zoom-in-btn"><i class="fa-solid fa-plus"></i></button>
+                  <button id="zoom-out-btn"><i class="fa-solid fa-minus"></i></button></span>
+                  <span id="file-filter-wrap">
+                    <input id="file-filter-input" type="text" placeholder="Filter files..." autocomplete="off" spellcheck="false" />
+                    <div id="file-filter-dropdown"></div>
+                  </span>
+                </div>
+                <div id="diff2html-container"></div>
+                <div id="diff2html-footer">
+                  <div id="cmd-viewer"><span id="cmd-content"></span></div>
+                </div>
               </div>
             </div>
         </body>
@@ -278,10 +301,18 @@ function handleMessageFromWebview(message: any) {
 		gitAdd(message.relativeFilePath, message.fileChangeState as Types.FileChangeState);
 	} else if (message.command === "gitUnstage") {
 		gitUnstage(message.relativeFilePath, message.fileChangeState as Types.FileChangeState);
+	} else if (message.command === "stageHunk") {
+		stageHunk(message.relativeFilePath, message.hunkHeader, message.fileChangeState as Types.FileChangeState);
+	} else if (message.command === "unstageHunk") {
+		unstageHunk(message.relativeFilePath, message.hunkHeader, message.fileChangeState as Types.FileChangeState);
 	} else if (message.command === "switchDiffMode") {
 		switchDiffMode(message.viewMode as "unstaged" | "staged");
 	} else if (message.command === "showLog") {
 		showLog(message.relativeFilePath);
+	} else if (message.command === "loadGitLog") {
+		sendGitLog(message.offset ?? 0, message.limit ?? GIT_LOG_PAGE_SIZE);
+	} else if (message.command === "viewCommitFromLog") {
+		viewCommitFromLog(message.hash);
 	}
 }
 
@@ -385,11 +416,24 @@ function getFileDiff(relativePath: string, fileChangeState: Types.FileChangeStat
 
 function revertHunk(relativePath: string, hunkHeader: string, fileChangeState: Types.FileChangeState, withWarning: boolean | undefined) {
 	const fileDiff: FileDiff | undefined = getFileDiff(relativePath, fileChangeState);
-	if (!fileDiff) {
-		return;
-	} else {
-		revertAction(fileDiff.getUsableHunkDiffByHunkHeader(hunkHeader), "hunk", withWarning, `Hunk Header: ${hunkHeader}`);
-	}
+	if (!fileDiff) { return; }
+	revertAction(fileDiff.getUsableHunkDiffByHunkHeader(hunkHeader), "hunk", withWarning, `Hunk Header: ${hunkHeader}`);
+}
+
+function stageHunk(relativePath: string, hunkHeader: string, fileChangeState: Types.FileChangeState) {
+	const fileDiff: FileDiff | undefined = getFileDiff(relativePath, fileChangeState);
+	if (!fileDiff) { return; }
+	const tmpPath = utils.createTempFile(`${uuidv4()}.diff`, fileDiff.getUsableHunkDiffByHunkHeader(hunkHeader));
+	utils.execShell(`git apply --cached -- ${tmpPath}`);
+	refresh(true);
+}
+
+function unstageHunk(relativePath: string, hunkHeader: string, fileChangeState: Types.FileChangeState) {
+	const fileDiff: FileDiff | undefined = getFileDiff(relativePath, fileChangeState);
+	if (!fileDiff) { return; }
+	const tmpPath = utils.createTempFile(`${uuidv4()}.diff`, fileDiff.getUsableHunkDiffByHunkHeader(hunkHeader));
+	utils.execShell(`git apply --cached -R -- ${tmpPath}`);
+	refresh(true);
 }
 
 function toggleFileDiff() {
@@ -422,6 +466,38 @@ async function showLog(relativePath: string) {
 
 	const hash = getCommitHash(selected);
 	updateDataByCmd(`git diff ${hash}~ ${hash} -- '${relativePath}'`);
+	data.viewMode = "commit";
+	doAction("showDiffContent", data);
+}
+
+const GIT_LOG_PAGE_SIZE = 20;
+
+function sendGitLog(offset: number, limit: number) {
+	try {
+		const raw = utils.execShell(utils.getGitLogCmd(offset, limit));
+		const commits: Types.GitCommit[] = raw.split("\n").filter(Boolean).map(line => {
+			const parts = line.split("\x01");
+			const refsStr = parts[6] ?? "";
+			const refs = refsStr ? refsStr.split(", ").map(r => r.trim()).filter(Boolean) : [];
+			return {
+				hash: parts[0] ?? "",
+				shortHash: parts[1] ?? "",
+				parentHashes: parts[2] ? parts[2].split(" ").filter(Boolean) : [],
+				subject: parts[3] ?? "",
+				author: parts[4] ?? "",
+				relativeTime: parts[5] ?? "",
+				refs,
+			};
+		});
+		doAction("showGitLog", { commits, offset, hasMore: commits.length === limit });
+	} catch {
+		doAction("showGitLog", { commits: [], offset, hasMore: false });
+	}
+}
+
+function viewCommitFromLog(hash: string) {
+	// git show works for all commits including root commits and merge commits
+	updateDataByCmd(`git show --format="" ${hash}`);
 	data.viewMode = "commit";
 	doAction("showDiffContent", data);
 }

@@ -40,10 +40,12 @@ For example, view Diff in HTML, revert a file ...
 - [x] Triggering extension commands from bottom toolbar
 - [x] Specify panel location (i.e. in editor or panel)
 - [x] View content of a GIT commit
-- [x] Support hunk action - e.g. revert hunk only code
+- [x] Support hunk action - e.g. revert, stage, or unstage individual hunks
 - [x] Binary file protection - large binary patches are automatically excluded to prevent renderer hangs
 - [x] Configurable max diff lines per file to handle very large diffs
-- [ ] Show and interact with git log tree
+- [x] Filter files in the diff view by name with autocomplete dropdown
+- [x] Smart tab placement — opens in the rightmost split when multiple editor groups exist, otherwise opens beside
+- [x] Git log tree panel -- toggle with the branch icon in the toolbar to browse all-branch commit history and click any commit to view its diff; commits load lazily (20 at a time) as you scroll
 
 ## Commands
 

@@ -7,6 +7,15 @@ export let extensionPath: string;
 
 const tempFolderName = "temp";
 const repo: string = getRepoPath();
+const gitRoot: string = resolveGitRoot(repo);
+
+function resolveGitRoot(fromPath: string): string {
+	try {
+		return cp.execSync('git rev-parse --show-toplevel', { cwd: fromPath, encoding: 'utf8' }).trim();
+	} catch {
+		return fromPath;
+	}
+}
 
 export function viewDiffInFile(fromHash: string, toHash: string, oldFilePath: string, newFilePath: string): string {
 	if (fromHash === UNCOMMITTED) {
@@ -35,6 +44,11 @@ export function viewStagedDiffForRepo(): string {
 	return `git diff --cached .`;
 }
 
+// %x01 as field separator -- safe since git disallows control chars in commit messages
+export function getGitLogCmd(offset: number, limit: number): string {
+	return `git --no-pager log --all --topo-order --skip=${offset} --max-count=${limit} --pretty=format:'%H%x01%h%x01%P%x01%s%x01%an%x01%ar%x01%D'`;
+}
+
 export function execShell(cmd: string): string {
 	const preCmd = `cd '${repo}';`;
 	try {
@@ -60,7 +74,7 @@ export function throwError(message: string): never {
 }
 
 export function getAbsolutePath(relativePath: string) {
-	return path.join(getRepoPath(), relativePath);
+	return path.join(gitRoot, relativePath);
 }
 
 export function createTempFile(filename: string, fileContent: string) {
