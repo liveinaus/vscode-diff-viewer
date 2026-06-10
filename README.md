@@ -106,6 +106,10 @@ For example, view Diff in HTML, revert a file ...
 
 [Install from Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=SamWang.better-diff-viewer)
 
+[Install from Open VSX Registry](https://open-vsx.org/extension/SamWang/better-diff-viewer) (for code-server, VSCodium, and other open-source VS Code builds)
+
+**code-server / VSCodium:** search for `SamWang.better-diff-viewer` in the Extensions panel, or download the `.vsix` from [GitHub Releases](https://github.com/liveinaus/vscode-diff-viewer/releases) and use `Extensions: Install from VSIX...`.
+
 ## Thanks to Diff2Html
 
 [Goto Diff2Html](https://github.com/rtfpessoa/diff2html)

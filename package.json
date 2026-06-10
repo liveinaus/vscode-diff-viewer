@@ -105,7 +105,8 @@
 		"pretest": "npm run compile-tests && npm run compile && npm run lint",
 		"lint": "eslint src --ext ts",
 		"test": "vscode-test",
-		"deploy": "vsce publish"
+		"deploy": "vsce publish",
+		"deploy:ovsx": "ovsx publish"
 	},
 	"devDependencies": {
 		"@types/mocha": "^10.0.10",
@@ -117,6 +118,7 @@
 		"@vscode/test-cli": "^0.0.12",
 		"@vscode/test-electron": "^2.5.2",
 		"@vscode/vsce": "^2.32.0",
+		"ovsx": "^0.9.5",
 		"eslint": "^8.57.1",
 		"ts-loader": "^9.6.0",
 		"typescript": "^5.9.3",
