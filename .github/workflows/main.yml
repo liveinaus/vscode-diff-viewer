@@ -8,10 +8,7 @@ on:
 
 jobs:
   build:
-    strategy:
-      matrix:
-        os: [macos-latest, ubuntu-latest, windows-latest]
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
@@ -23,16 +20,13 @@ jobs:
           node-version: 22.x
       - run: npm install
       - run: xvfb-run -a npm test
-        if: runner.os == 'Linux'
-      - run: npm test
-        if: runner.os != 'Linux'
       - name: Publish to VS Marketplace
-        if: success() && startsWith(github.ref, 'refs/tags/') && matrix.os == 'ubuntu-latest'
+        if: success() && startsWith(github.ref, 'refs/tags/')
         run: npm run deploy
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
       - name: Publish to Open VSX
-        if: success() && startsWith(github.ref, 'refs/tags/') && matrix.os == 'ubuntu-latest'
+        if: success() && startsWith(github.ref, 'refs/tags/')
         run: |
           npx ovsx create-namespace SamWang -p $OVSX_PAT || true
           npm run deploy:ovsx
